@@ -37,9 +37,6 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
                   itemCount: 7,
                   itemBuilder: (context, i) {
                     final Week week = viewModel.weekSlots![pageIndex]!;
-
-                    print('week_index: ${pageIndex}');
-                    print('day_index: ${i + 1}');
                     final Date date = week.days[i];
 
                     return Center(

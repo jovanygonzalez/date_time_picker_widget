@@ -198,6 +198,39 @@ class DateTimePickerViewModel extends BaseViewModel {
 
     int dateIndex = 0;
 
+    fillWeekSlots();
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (type == DateTimePickerType.Both || type == DateTimePickerType.Date) {
+        if (weekSlots!.isNotEmpty) {
+          selectedDateIndex = dateIndex;
+          dateScrollController.animateToPage(
+            0,
+            duration: const Duration(seconds: 1),
+            curve: Curves.linearToEaseOut,
+          );
+        } else {
+          weekSlots = null;
+        }
+      }
+    });
+
+    if (type == DateTimePickerType.Time) {
+      _fetchTimeSlots(currentDateTime);
+    }
+  }
+
+  /*
+  * Llena la lista de semanas con los días que se van a mostrar en el widget
+  * En el widget algunas veces se deben mostrar días que no están en el rango indicado,
+  * por ello se debe calcular si sí o no (fillWeekBefore & fillWeekAfter).
+  *
+  * Una vez obtenido el rango de días que se van a mostrar (widgetStartDate & widgetEndDate),
+  * Realizaremos un avance dia tras día hasta llegar al final del rango.
+  *
+  * Si el día actual es el último de la semana (domingo), agregamos la semana a la lista de semanas (weekSlots)
+  * */
+  void fillWeekSlots() {
     final bool fillWeekBefore = _startDate!.weekday != firstDayOnWeek;
     final bool fillWeekAfter = endDate!.weekday != lastDayOnWeek;
 
@@ -225,10 +258,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     Week fillingWeek = Week(index: weekIndex, days: []);
 
     while (buildCurrentDate.isBefore(widgetEndDate)) {
-      if (buildCurrentDate.day == 29) {
-        print("object");
-      }
-
       //Todos los días lo agregamos en una semana
       final newDate = personalized_date.Date(
         weekIndex: weekIndex,
@@ -248,25 +277,6 @@ class DateTimePickerViewModel extends BaseViewModel {
 
       buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
       dayElementIndex++;
-    }
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (type == DateTimePickerType.Both || type == DateTimePickerType.Date) {
-        if (weekSlots!.isNotEmpty) {
-          selectedDateIndex = dateIndex;
-          dateScrollController.animateToPage(
-            0,
-            duration: const Duration(seconds: 1),
-            curve: Curves.linearToEaseOut,
-          );
-        } else {
-          weekSlots = null;
-        }
-      }
-    });
-
-    if (type == DateTimePickerType.Time) {
-      _fetchTimeSlots(currentDateTime);
     }
   }
 
