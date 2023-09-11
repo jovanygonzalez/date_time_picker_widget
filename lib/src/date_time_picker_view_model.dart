@@ -116,14 +116,16 @@ class DateTimePickerViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  int _selectedDateIndex = 0;
+  late Date _selectedDateObjet;
 
-  int get selectedDateIndex => _selectedDateIndex;
+  Date get selectedDateObjet {
+    return _selectedDateObjet;
+  }
 
-  set selectedDateIndex(int selectedDateIndex) {
-    _selectedDateIndex = selectedDateIndex;
+  set selectedDateObjet(Date selectedDateObjet) {
+    _selectedDateObjet = selectedDateObjet;
     notifyListeners();
-    selectedDate = _findDate(selectedDateIndex);
+    selectedDate = _findDate(selectedDateObjet);
     if (selectedDate != null) {
       selectedWeekday = selectedDate?.weekday;
       onDateChanged!(selectedDate!);
@@ -177,7 +179,7 @@ class DateTimePickerViewModel extends BaseViewModel {
 
   List<Date> newDatesList = [];
 
-  void init() async {
+  void init() {
     final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
     final _currentDateTime = DateTime(
             currentDateTime.year, currentDateTime.month, currentDateTime.day)
@@ -196,14 +198,11 @@ class DateTimePickerViewModel extends BaseViewModel {
         .diff(Jiffy.parseFromDateTime(_startDate!), unit: Unit.week)
         .toInt();
 
-    int dateIndex = 0;
-
-    fillWeekSlots();
+    fillWeekSlots(initialSelectedDate!);
 
     Future.delayed(const Duration(milliseconds: 500), () {
       if (type == DateTimePickerType.Both || type == DateTimePickerType.Date) {
         if (weekSlots!.isNotEmpty) {
-          selectedDateIndex = dateIndex;
           dateScrollController.animateToPage(
             0,
             duration: const Duration(seconds: 1),
@@ -220,6 +219,13 @@ class DateTimePickerViewModel extends BaseViewModel {
     }
   }
 
+  int findDateIndex(DateTime date) {
+    final daysBefore = date.weekday - firstDayOnWeek;
+
+    _startDate = date.subtract(Duration(days: daysBefore));
+    return startDate!.difference(date).inDays;
+  }
+
   /*
   * Llena la lista de semanas con los días que se van a mostrar en el widget
   * En el widget algunas veces se deben mostrar días que no están en el rango indicado,
@@ -230,7 +236,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   *
   * Si el día actual es el último de la semana (domingo), agregamos la semana a la lista de semanas (weekSlots)
   * */
-  void fillWeekSlots() {
+  void fillWeekSlots(DateTime initialSelectedDate) {
     final bool fillWeekBefore = _startDate!.weekday != firstDayOnWeek;
     final bool fillWeekAfter = endDate!.weekday != lastDayOnWeek;
 
@@ -263,7 +269,7 @@ class DateTimePickerViewModel extends BaseViewModel {
         weekIndex: weekIndex,
         index: dayElementIndex,
         date: buildCurrentDate,
-        enabled: true,
+        enabled: getIsEnabledDay(buildCurrentDate),
       );
       fillingWeek.days.add(newDate);
 
@@ -277,27 +283,32 @@ class DateTimePickerViewModel extends BaseViewModel {
 
       buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
       dayElementIndex++;
-    }
-  }
 
-  int _findWeekIndex(int dateIndex) {
-    return dateIndex ~/ 7;
-  }
-
-  DateTime? _findDate(int dateIndex) {
-    final weekIndex = dateIndex ~/ 7;
-
-    if (weekSlots != null && weekSlots!.isNotEmpty) {
-      final days = weekSlots![weekIndex]!.days;
-
-      for (int i = 0; i < days.length; i++) {
-        if (days[i].index == dateIndex) {
-          return days[i].date;
-        }
+      //Aprovechamos la iteración para obtener el objeto Date del día seleccionado inicial
+      if (initialSelectedDate.difference(buildCurrentDate).inDays == 0) {
+        _selectedDateObjet = newDate;
       }
     }
+  }
 
-    return null;
+  /*
+  * Obtiene el estado de un día, si está habilitado o no
+  * Solo es verdadero si está dentro del rango de fechas proporcionado
+  */
+  bool getIsEnabledDay(DateTime date) {
+    bool isEnabled = true;
+
+    if (date.isBefore(_startDate!)) {
+      isEnabled = false;
+    } else if (date.isAfter(_endDate!)) {
+      isEnabled = false;
+    }
+
+    return isEnabled;
+  }
+
+  DateTime? _findDate(Date dateObjet) {
+    return dateObjet.date;
   }
 
   void _fetchTimeSlots(DateTime? currentDateTime) {
@@ -424,36 +435,36 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   void onClickNext() {
-    final dt = Jiffy.parseFromDateTime(selectedDate!).add(months: 1);
-    final diff = dt
-        .diff(
-          Jiffy.parseFromDateTime(selectedDate!),
-          unit: Unit.day,
-        )
-        .toInt();
+    // final dt = Jiffy.parseFromDateTime(selectedDate!).add(months: 1);
+    // final diff = dt
+    //     .diff(
+    //       Jiffy.parseFromDateTime(selectedDate!),
+    //       unit: Unit.day,
+    //     )
+    //     .toInt();
+    //
+    // if (numberOfDays < selectedDateObjet + diff) {
+    //   selectedDateObjet = numberOfDays - 1;
+    // } else {
+    //   selectedDateObjet += diff;
+    // }
 
-    if (numberOfDays < selectedDateIndex + diff) {
-      selectedDateIndex = numberOfDays - 1;
-    } else {
-      selectedDateIndex += diff;
-    }
-
-    dateScrollController.animateToPage(_findWeekIndex(selectedDateIndex),
+    dateScrollController.animateToPage(selectedDateObjet.weekIndex,
         duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
   }
 
   void onClickPrevious() {
-    final dt = Jiffy.parseFromDateTime(selectedDate!).subtract(months: 1);
-    final diff =
-        Jiffy.parseFromDateTime(selectedDate!).diff(dt, unit: Unit.day).toInt();
+    // final dt = Jiffy.parseFromDateTime(selectedDate!).subtract(months: 1);
+    // final diff =
+    //     Jiffy.parseFromDateTime(selectedDate!).diff(dt, unit: Unit.day).toInt();
+    //
+    // if (selectedDateObjet < diff) {
+    //   selectedDateObjet = 0;
+    // } else {
+    //   selectedDateObjet -= diff;
+    // }
 
-    if (selectedDateIndex < diff) {
-      selectedDateIndex = 0;
-    } else {
-      selectedDateIndex -= diff;
-    }
-
-    dateScrollController.animateToPage(_findWeekIndex(selectedDateIndex),
+    dateScrollController.animateToPage(selectedDateObjet.weekIndex,
         duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
   }
 }

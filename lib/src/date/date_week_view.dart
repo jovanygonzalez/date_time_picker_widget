@@ -43,17 +43,19 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
                       child: InkWell(
                         onTap: !date.enabled
                             ? null
-                            : () => viewModel.selectedDateIndex = date.index,
+                            : () => viewModel.selectedDateObjet = date,
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(90),
                             border: Border.all(
-                              color: date.index == viewModel.selectedDateIndex
+                              color: date.index ==
+                                      viewModel.selectedDateObjet.index
                                   ? Theme.of(context).colorScheme.secondary
                                   : Colors.grey,
                             ),
                             color: date.enabled
-                                ? date.index == viewModel.selectedDateIndex
+                                ? date.index ==
+                                        viewModel.selectedDateObjet.index
                                     ? Theme.of(context).colorScheme.secondary
                                     : Colors.white
                                 : Colors.grey.shade300,
@@ -66,7 +68,8 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: date.index == viewModel.selectedDateIndex
+                                color: date.index ==
+                                        viewModel.selectedDateObjet.index
                                     ? Colors.white
                                     : Colors.grey),
                             textAlign: TextAlign.center,
