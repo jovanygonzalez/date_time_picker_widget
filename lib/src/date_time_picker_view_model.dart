@@ -81,43 +81,34 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   int? _selectedWeekday = 0;
-
   int? get selectedWeekday => _selectedWeekday;
-
   set selectedWeekday(int? selectedWeekday) {
     _selectedWeekday = selectedWeekday;
     notifyListeners();
   }
 
   int _numberOfWeeks = 0;
-
   int get numberOfWeeks => _numberOfWeeks;
-
   set numberOfWeeks(int numberOfWeeks) {
     _numberOfWeeks = numberOfWeeks;
     notifyListeners();
   }
 
   int _numberOfDays = 0;
-
   int get numberOfDays => _numberOfDays;
-
   set numberOfDays(int numberOfDays) {
     _numberOfDays = numberOfDays;
     notifyListeners();
   }
 
   DateTime? _selectedDate;
-
   DateTime? get selectedDate => _selectedDate;
-
   set selectedDate(DateTime? selectedDate) {
     _selectedDate = selectedDate;
     notifyListeners();
   }
 
   late Date _selectedDateObjet;
-
   Date get selectedDateObjet {
     return _selectedDateObjet;
   }
@@ -125,7 +116,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   set selectedDateObjet(Date selectedDateObjet) {
     _selectedDateObjet = selectedDateObjet;
     notifyListeners();
-    selectedDate = _findDate(selectedDateObjet);
+    selectedDate = selectedDateObjet.date;
     if (selectedDate != null) {
       selectedWeekday = selectedDate?.weekday;
       onDateChanged!(selectedDate!);
@@ -134,18 +125,14 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   List<Week?>? _dateSlots = [];
-
   List<Week?>? get weekSlots => _dateSlots;
-
   set weekSlots(List<Week?>? dateSlots) {
     _dateSlots = dateSlots;
     notifyListeners();
   }
 
   int _selectedTimeIndex = 0;
-
   int get selectedTimeIndex => _selectedTimeIndex;
-
   set selectedTimeIndex(int selectedTimeIndex) {
     _selectedTimeIndex = selectedTimeIndex;
     notifyListeners();
@@ -153,9 +140,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   List<DateTime>? _timeSlots = [];
-
   List<DateTime>? get timeSlots => _timeSlots;
-
   set timeSlots(List<DateTime>? timeSlots) {
     _timeSlots = timeSlots;
     notifyListeners();
@@ -176,8 +161,6 @@ class DateTimePickerViewModel extends BaseViewModel {
 
   final firstDayOnWeek = DateTime.monday;
   final lastDayOnWeek = DateTime.sunday;
-
-  List<Date> newDatesList = [];
 
   void init() {
     final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
@@ -217,13 +200,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     if (type == DateTimePickerType.Time) {
       _fetchTimeSlots(currentDateTime);
     }
-  }
-
-  int findDateIndex(DateTime date) {
-    final daysBefore = date.weekday - firstDayOnWeek;
-
-    _startDate = date.subtract(Duration(days: daysBefore));
-    return startDate!.difference(date).inDays;
   }
 
   /*
@@ -305,10 +281,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     }
 
     return isEnabled;
-  }
-
-  DateTime? _findDate(Date dateObjet) {
-    return dateObjet.date;
   }
 
   void _fetchTimeSlots(DateTime? currentDateTime) {
@@ -428,10 +400,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     final dt = _startTime!.add(
         Duration(minutes: (60 - _startTime!.minute) % timeInterval.inMinutes));
     return dt.add(Duration(minutes: timeInterval.inMinutes * index));
-  }
-
-  DateTime getNextDate(int index) {
-    return _startDate!.add(Duration(days: index));
   }
 
   void onClickNext() {
