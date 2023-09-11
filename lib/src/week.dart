@@ -4,5 +4,8 @@ class Week {
   final int index;
   final List<Date> days;
 
-  Week({required this.index, required this.days});
+  Week({
+    required this.index,
+    required this.days,
+  });
 }

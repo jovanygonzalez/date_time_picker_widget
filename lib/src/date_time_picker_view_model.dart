@@ -2,6 +2,7 @@ import 'package:date_time_picker_widget/src/date.dart';
 import 'package:date_time_picker_widget/src/date_time_picker_type.dart';
 import 'package:date_time_picker_widget/src/week.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stacked/stacked.dart';
@@ -80,12 +81,11 @@ class DateTimePickerViewModel extends BaseViewModel {
     }
   }
 
-  int? _selectedWeekday = 0;
-  int? get selectedWeekday => _selectedWeekday;
-  set selectedWeekday(int? selectedWeekday) {
-    _selectedWeekday = selectedWeekday;
-    notifyListeners();
-  }
+  //En este campo se van a guardar los índices de navegación entre meses
+  //Si tenemos el índice de la semana que contiene el primer día del mes, entonces podemos navegar entre meses
+  /*años-mes, weekIndex */
+  /*2023-09, 6*/
+  Map<String, int> monthNavigationIndexes = {};
 
   int _numberOfWeeks = 0;
   int get numberOfWeeks => _numberOfWeeks;
@@ -101,13 +101,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  DateTime? _selectedDate;
-  DateTime? get selectedDate => _selectedDate;
-  set selectedDate(DateTime? selectedDate) {
-    _selectedDate = selectedDate;
-    notifyListeners();
-  }
-
   late Date _selectedDateObjet;
   Date get selectedDateObjet {
     return _selectedDateObjet;
@@ -116,12 +109,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   set selectedDateObjet(Date selectedDateObjet) {
     _selectedDateObjet = selectedDateObjet;
     notifyListeners();
-    selectedDate = selectedDateObjet.date;
-    if (selectedDate != null) {
-      selectedWeekday = selectedDate?.weekday;
-      onDateChanged!(selectedDate!);
-      _fetchTimeSlots(selectedDate);
-    }
+    _fetchTimeSlots(selectedDateObjet);
   }
 
   List<Week?>? _dateSlots = [];
@@ -198,7 +186,7 @@ class DateTimePickerViewModel extends BaseViewModel {
     });
 
     if (type == DateTimePickerType.Time) {
-      _fetchTimeSlots(currentDateTime);
+      _fetchTimeSlots(selectedDateObjet);
     }
   }
 
@@ -235,7 +223,6 @@ class DateTimePickerViewModel extends BaseViewModel {
 
     DateTime buildCurrentDate = widgetStartDate;
     int dayElementIndex = 0;
-
     int weekIndex = 0;
     Week fillingWeek = Week(index: weekIndex, days: []);
 
@@ -247,23 +234,35 @@ class DateTimePickerViewModel extends BaseViewModel {
         date: buildCurrentDate,
         enabled: getIsEnabledDay(buildCurrentDate),
       );
+
+      //En el objeto Week se le debe indicar si contiene el minimo día del mes
+      //Esto servirá para navegación entre las diferentes meses.
+      // Y digo mínimo porque puede que no se pueda mostrar el día 1 del mes
+      if (buildCurrentDate.day == 1 || dayElementIndex == 0) {
+        final String yearMonth = DateFormat('yyyy-MM').format(buildCurrentDate);
+        monthNavigationIndexes[yearMonth] = weekIndex;
+      }
+
       fillingWeek.days.add(newDate);
 
       //Si el día es el último de la semana, agregamos la semana a la lista de semanas
       // y creamos una nueva semana
       if (buildCurrentDate.weekday == lastDayOnWeek) {
+        //Finalizó la semana y se agrega a la lista de semanas
         weekSlots!.add(fillingWeek);
-        fillingWeek = Week(index: weekIndex, days: []);
-        weekIndex++;
-      }
 
-      buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
-      dayElementIndex++;
+        //El nuevo weekIndex se le aumentará 1.
+        weekIndex++;
+        fillingWeek = Week(index: weekIndex, days: []);
+      }
 
       //Aprovechamos la iteración para obtener el objeto Date del día seleccionado inicial
       if (initialSelectedDate.difference(buildCurrentDate).inDays == 0) {
         _selectedDateObjet = newDate;
       }
+
+      buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
+      dayElementIndex++;
     }
   }
 
@@ -283,8 +282,8 @@ class DateTimePickerViewModel extends BaseViewModel {
     return isEnabled;
   }
 
-  void _fetchTimeSlots(DateTime? currentDateTime) {
-    var _currentDateTime = currentDateTime;
+  void _fetchTimeSlots(Date currentDate) {
+    var _currentDateTime = currentDate.date;
     //TIME
     if (startTime == null) {
       _startTime = DateTime(
@@ -402,37 +401,43 @@ class DateTimePickerViewModel extends BaseViewModel {
     return dt.add(Duration(minutes: timeInterval.inMinutes * index));
   }
 
-  void onClickNext() {
-    // final dt = Jiffy.parseFromDateTime(selectedDate!).add(months: 1);
-    // final diff = dt
-    //     .diff(
-    //       Jiffy.parseFromDateTime(selectedDate!),
-    //       unit: Unit.day,
-    //     )
-    //     .toInt();
-    //
-    // if (numberOfDays < selectedDateObjet + diff) {
-    //   selectedDateObjet = numberOfDays - 1;
-    // } else {
-    //   selectedDateObjet += diff;
-    // }
+  void onClickPrevious() {
+    int? previousInitialWeekIndex;
 
-    dateScrollController.animateToPage(selectedDateObjet.weekIndex,
-        duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+    final previousMonth = DateTime(
+      selectedDateObjet.date!.year,
+      selectedDateObjet.date!.month - 1,
+      selectedDateObjet.date!.day,
+    );
+
+    final String yearMonth = DateFormat('yyyy-MM').format(previousMonth);
+    previousInitialWeekIndex = monthNavigationIndexes[yearMonth];
+
+    //Cuando finalizamos la búsqueda pero no se encontró la semana con el siguiente mes
+    //Entonces no hacemos nada
+    if (previousInitialWeekIndex != null) {
+      dateScrollController.animateToPage(previousInitialWeekIndex,
+          duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+    }
   }
 
-  void onClickPrevious() {
-    // final dt = Jiffy.parseFromDateTime(selectedDate!).subtract(months: 1);
-    // final diff =
-    //     Jiffy.parseFromDateTime(selectedDate!).diff(dt, unit: Unit.day).toInt();
-    //
-    // if (selectedDateObjet < diff) {
-    //   selectedDateObjet = 0;
-    // } else {
-    //   selectedDateObjet -= diff;
-    // }
+  void onClickNext() {
+    int? nextInitialWeekIndex;
 
-    dateScrollController.animateToPage(selectedDateObjet.weekIndex,
-        duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+    final nextMonth = DateTime(
+      selectedDateObjet.date!.year,
+      selectedDateObjet.date!.month + 1,
+      selectedDateObjet.date!.day,
+    );
+
+    final String yearMonth = DateFormat('yyyy-MM').format(nextMonth);
+    nextInitialWeekIndex = monthNavigationIndexes[yearMonth];
+
+    //Cuando finalizamos la búsqueda pero no se encontró la semana con el siguiente mes
+    //Entonces no hacemos nada
+    if (nextInitialWeekIndex != null) {
+      dateScrollController.animateToPage(nextInitialWeekIndex,
+          duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+    }
   }
 }

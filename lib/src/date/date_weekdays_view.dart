@@ -18,7 +18,8 @@ class DateWeekdaysView extends ViewModelWidget<DateTimePickerViewModel> {
                       '${e['text']}',
                       style: TextStyle(
                         fontSize: 18,
-                        color: e['value'] == viewModel.selectedWeekday
+                        color: e['value'] ==
+                                viewModel.selectedDateObjet.date!.weekday
                             ? Colors.black
                             : Colors.grey,
                         fontWeight: FontWeight.w600,
