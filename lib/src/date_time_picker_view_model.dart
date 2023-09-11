@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stacked/stacked.dart';
+import 'date.dart' as personalized_date;
 
 class DateTimePickerViewModel extends BaseViewModel {
   final DateTime? initialSelectedDate;
@@ -29,52 +30,52 @@ class DateTimePickerViewModel extends BaseViewModel {
   final String? locale;
 
   final List<Map<String, dynamic>> _weekdays = [
-    {'value': DateTime.sunday, 'text': 'S'},
-    {'value': DateTime.monday, 'text': 'M'},
-    {'value': DateTime.tuesday, 'text': 'T'},
-    {'value': DateTime.wednesday, 'text': 'W'},
-    {'value': DateTime.thursday, 'text': 'T'},
-    {'value': DateTime.friday, 'text': 'F'},
+    {'value': DateTime.monday, 'text': 'L'},
+    {'value': DateTime.tuesday, 'text': 'M'},
+    {'value': DateTime.wednesday, 'text': 'M'},
+    {'value': DateTime.thursday, 'text': 'J'},
+    {'value': DateTime.friday, 'text': 'V'},
     {'value': DateTime.saturday, 'text': 'S'},
+    {'value': DateTime.sunday, 'text': 'D'},
   ];
 
   List<Map<String, dynamic>> weekdays = [];
 
   DateTimePickerViewModel(
-      this.initialSelectedDate,
-      this.onDateChanged,
-      this.onTimeChanged,
-      this.startDate,
-      this.endDate,
-      this.startTime,
-      this.endTime,
-      this.timeInterval,
-      // ignore: avoid_positional_boolean_parameters
-      this.is24h,
-      this.type,
-      this.timeOutOfRangeError,
-      this.datePickerTitle,
-      this.timePickerTitle,
-      this.customStringWeekdays,
-      this.numberOfWeeksToDisplay,
-      this.locale,
-      ) {
+    this.initialSelectedDate,
+    this.onDateChanged,
+    this.onTimeChanged,
+    this.startDate,
+    this.endDate,
+    this.startTime,
+    this.endTime,
+    this.timeInterval,
+    // ignore: avoid_positional_boolean_parameters
+    this.is24h,
+    this.type,
+    this.timeOutOfRangeError,
+    this.datePickerTitle,
+    this.timePickerTitle,
+    this.customStringWeekdays,
+    this.numberOfWeeksToDisplay,
+    this.locale,
+  ) {
     _startDate = startDate;
     _startTime = startTime;
     _endDate = endDate;
     _endTime = endTime;
 
-    if(customStringWeekdays != null && customStringWeekdays!.length == 7){
+    if (customStringWeekdays != null && customStringWeekdays!.length == 7) {
       weekdays = [
-        {'value': DateTime.sunday, 'text': customStringWeekdays![0]},
-        {'value': DateTime.monday, 'text': customStringWeekdays![1]},
-        {'value': DateTime.tuesday, 'text': customStringWeekdays![2]},
-        {'value': DateTime.wednesday, 'text': customStringWeekdays![3]},
-        {'value': DateTime.thursday, 'text': customStringWeekdays![4]},
-        {'value': DateTime.friday, 'text': customStringWeekdays![5]},
-        {'value': DateTime.saturday, 'text': customStringWeekdays![6]},
+        {'value': DateTime.monday, 'text': customStringWeekdays![0]},
+        {'value': DateTime.tuesday, 'text': customStringWeekdays![1]},
+        {'value': DateTime.wednesday, 'text': customStringWeekdays![2]},
+        {'value': DateTime.thursday, 'text': customStringWeekdays![3]},
+        {'value': DateTime.friday, 'text': customStringWeekdays![4]},
+        {'value': DateTime.saturday, 'text': customStringWeekdays![5]},
+        {'value': DateTime.sunday, 'text': customStringWeekdays![6]},
       ];
-    }else{
+    } else {
       weekdays = _weekdays;
     }
   }
@@ -132,9 +133,9 @@ class DateTimePickerViewModel extends BaseViewModel {
 
   List<Week?>? _dateSlots = [];
 
-  List<Week?>? get dateSlots => _dateSlots;
+  List<Week?>? get weekSlots => _dateSlots;
 
-  set dateSlots(List<Week?>? dateSlots) {
+  set weekSlots(List<Week?>? dateSlots) {
     _dateSlots = dateSlots;
     notifyListeners();
   }
@@ -171,70 +172,95 @@ class DateTimePickerViewModel extends BaseViewModel {
 
   ItemPositionsListener get timePositionsListener => _timePositionsListener;
 
+  final firstDayOnWeek = DateTime.monday;
+  final lastDayOnWeek = DateTime.sunday;
+
+  List<Date> newDatesList = [];
+
   void init() async {
-    final currentDateTime = initialSelectedDate ?? DateTime.now();
+    final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
     final _currentDateTime = DateTime(
-        currentDateTime.year, currentDateTime.month, currentDateTime.day);
+            currentDateTime.year, currentDateTime.month, currentDateTime.day)
+        .toUtc();
 
     //DATE
     _startDate ??= _currentDateTime;
-    _startDate = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+    _startDate =
+        DateTime(_startDate!.year, _startDate!.month, _startDate!.day).toUtc();
 
     _endDate ??= _startDate!.add(const Duration(days: 365 * 5));
-    _endDate = DateTime(_endDate!.year, _endDate!.month, _endDate!.day);
+    _endDate = DateTime(_endDate!.year, _endDate!.month, _endDate!.day).toUtc();
 
     numberOfDays = _endDate!.difference(_startDate!).inDays;
     numberOfWeeks = Jiffy.parseFromDateTime(_endDate!)
         .diff(Jiffy.parseFromDateTime(_startDate!), unit: Unit.week)
         .toInt();
 
-    // print('currentDateTime => $currentDateTime');
-    // print('_currentDateTime => $_currentDateTime');
-    // print('_startDate => $_startDate');
-    // print('_endDate => $_endDate');
-    // print('numberOfDays => $numberOfDays');
-    // print('numberOfWeeks => $numberOfWeeks');
-
     int dateIndex = 0;
-    Week? week;
 
-    for (int i = 0; i < numberOfDays; i++) {
-      final date = getNextDate(i);
-      final w = Jiffy.parseFromDateTime(date).weekOfYear;
+    final bool fillWeekBefore = _startDate!.weekday != firstDayOnWeek;
+    final bool fillWeekAfter = endDate!.weekday != lastDayOnWeek;
 
-      if (i == 0) {
-        week = Week(number: w, days: _fillWeek(date, toStart: true));
+    late final DateTime widgetStartDate;
+    late final DateTime widgetEndDate;
 
-        dateSlots!.add(week);
-      } else if (week!.number != w && week.days!.length == 7) {
-        week = Week(number: w, days: []);
+    if (fillWeekBefore) {
+      final int daysToFill = _startDate!.weekday - firstDayOnWeek;
+      widgetStartDate = _startDate!.subtract(Duration(days: daysToFill));
+    } else {
+      widgetStartDate = _startDate!;
+    }
 
-        dateSlots!.add(week);
+    if (fillWeekAfter) {
+      final int daysToFill = lastDayOnWeek - _endDate!.weekday;
+      widgetEndDate = _endDate!.add(Duration(days: daysToFill));
+    } else {
+      widgetEndDate = _endDate!;
+    }
+
+    DateTime buildCurrentDate = widgetStartDate;
+    int dayElementIndex = 0;
+
+    int weekIndex = 0;
+    Week fillingWeek = Week(index: weekIndex, days: []);
+
+    while (buildCurrentDate.isBefore(widgetEndDate)) {
+      if (buildCurrentDate.day == 29) {
+        print("object");
       }
 
-      week.days!.add(Date(index: i, date: date));
+      //Todos los días lo agregamos en una semana
+      final newDate = personalized_date.Date(
+        weekIndex: weekIndex,
+        index: dayElementIndex,
+        date: buildCurrentDate,
+        enabled: true,
+      );
+      fillingWeek.days.add(newDate);
 
-      if (date.difference(_currentDateTime).inDays == 0) {
-        dateIndex = i;
-        // print('dateIndex => $dateIndex');
+      //Si el día es el último de la semana, agregamos la semana a la lista de semanas
+      // y creamos una nueva semana
+      if (buildCurrentDate.weekday == lastDayOnWeek) {
+        weekSlots!.add(fillingWeek);
+        fillingWeek = Week(index: weekIndex, days: []);
+        weekIndex++;
       }
 
-      if (i + 1 == numberOfDays) {
-        week.days!.addAll(_fillWeek(date, toEnd: true));
-      }
+      buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
+      dayElementIndex++;
     }
 
     Future.delayed(const Duration(milliseconds: 500), () {
       if (type == DateTimePickerType.Both || type == DateTimePickerType.Date) {
-        if (dateSlots!.isNotEmpty) {
+        if (weekSlots!.isNotEmpty) {
           selectedDateIndex = dateIndex;
           dateScrollController.animateToPage(
-            _findWeekIndex(selectedDateIndex),
+            0,
             duration: const Duration(seconds: 1),
             curve: Curves.linearToEaseOut,
           );
         } else {
-          dateSlots = null;
+          weekSlots = null;
         }
       }
     });
@@ -244,57 +270,20 @@ class DateTimePickerViewModel extends BaseViewModel {
     }
   }
 
-  List<Date> _fillWeek(DateTime date,
-      {bool toStart = false, bool toEnd = false}) {
-    final List<Date> dates = [];
-
-    if (toStart) {
-      int i = 1;
-      while (Jiffy.parseFromDateTime(date.subtract(Duration(days: i)))
-              .weekOfYear ==
-          Jiffy.parseFromDateTime(date).weekOfYear) {
-        dates.insert(
-            0,
-            Date(
-                index: -1,
-                date: date.subtract(Duration(days: i)),
-                enabled: false));
-        i++;
-      }
-    }
-
-    if (toEnd) {
-      int i = 1;
-      while (Jiffy.parseFromDateTime(date.add(Duration(days: i))).weekOfYear ==
-          Jiffy.parseFromDateTime(date).weekOfYear) {
-        dates.add(
-            Date(index: -1, date: date.add(Duration(days: i)), enabled: false));
-        i++;
-      }
-    }
-
-    return dates;
-  }
-
   int _findWeekIndex(int dateIndex) {
-    if (dateSlots != null && dateSlots!.isNotEmpty) {
-      return dateSlots!.indexWhere((w) =>
-          w!.days!.where((d) => d.index == dateIndex).toList().isNotEmpty);
-    } else {
-      return 0;
-    }
+    return dateIndex ~/ 7;
   }
 
   DateTime? _findDate(int dateIndex) {
-    // print('_findDate => $dateIndex');
-    if (dateSlots != null && dateSlots!.isNotEmpty) {
-      final w = dateSlots!
-          .where((e) =>
-              e!.days!.where((d) => d.index == dateIndex).toList().length == 1)
-          .toList();
+    final weekIndex = dateIndex ~/ 7;
 
-      if (w.length == 1) {
-        return w[0]!.days!.firstWhere((e) => e.index == dateIndex).date;
+    if (weekSlots != null && weekSlots!.isNotEmpty) {
+      final days = weekSlots![weekIndex]!.days;
+
+      for (int i = 0; i < days.length; i++) {
+        if (days[i].index == dateIndex) {
+          return days[i].date;
+        }
       }
     }
 
@@ -309,7 +298,7 @@ class DateTimePickerViewModel extends BaseViewModel {
         _currentDateTime!.year,
         _currentDateTime.month,
         _currentDateTime.day,
-      );
+      ).toUtc();
     }
     if (endTime == null) {
       _endTime = DateTime(
@@ -317,12 +306,12 @@ class DateTimePickerViewModel extends BaseViewModel {
         _currentDateTime.month,
         _currentDateTime.day,
         24,
-      );
+      ).toUtc();
     }
 
     if (startTime != null || endTime != null) {
       // current time is not today
-      if (_currentDateTime!.day - DateTime.now().day > 0) {
+      if (_currentDateTime!.day - DateTime.now().toUtc().day > 0) {
         if (startTime != null) {
           _currentDateTime = _startTime = DateTime(
             _currentDateTime.year,
@@ -330,7 +319,7 @@ class DateTimePickerViewModel extends BaseViewModel {
             _currentDateTime.day,
             startTime!.hour,
             startTime!.minute,
-          );
+          ).toUtc();
         }
         if (endTime != null) {
           _endTime = DateTime(
@@ -339,18 +328,18 @@ class DateTimePickerViewModel extends BaseViewModel {
             _currentDateTime.day,
             endTime!.hour,
             endTime!.minute,
-          );
+          ).toUtc();
         }
       } else if (_currentDateTime
-          .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+          .isBefore(DateTime.now().toUtc().add(const Duration(seconds: 5)))) {
         // current time is today
         _currentDateTime = _startTime = DateTime(
           _currentDateTime.year,
           _currentDateTime.month,
           _currentDateTime.day,
-          DateTime.now().hour,
-          DateTime.now().minute,
-        );
+          DateTime.now().toUtc().hour,
+          DateTime.now().toUtc().minute,
+        ).toUtc();
 
         if (startTime != null && _currentDateTime.hour < startTime!.hour) {
           _currentDateTime = _startTime = DateTime(
@@ -359,7 +348,7 @@ class DateTimePickerViewModel extends BaseViewModel {
             _currentDateTime.day,
             startTime!.hour,
             startTime!.minute,
-          );
+          ).toUtc();
         }
 
         if (endTime != null) {
@@ -369,7 +358,7 @@ class DateTimePickerViewModel extends BaseViewModel {
             _currentDateTime.day,
             endTime!.hour,
             endTime!.minute,
-          );
+          ).toUtc();
         } else {
           _endTime = DateTime(
             _currentDateTime.year,
@@ -377,7 +366,7 @@ class DateTimePickerViewModel extends BaseViewModel {
             _currentDateTime.day,
             24,
             0,
-          );
+          ).toUtc();
         }
       }
     }

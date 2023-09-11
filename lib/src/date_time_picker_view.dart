@@ -42,7 +42,6 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.numberOfWeeksToDisplay = 1,
     this.customStringWeekdays,
     this.locale,
-
   }) : super(key: key);
 
   @override
@@ -99,7 +98,10 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
             children: [
               if (type == DateTimePickerType.Both ||
                   type == DateTimePickerType.Date)
-                DatePickerView(constraints: constraints, locale: locale,),
+                DatePickerView(
+                  constraints: constraints,
+                  locale: locale,
+                ),
               if (type == DateTimePickerType.Both) const SizedBox(height: 16),
               if (type == DateTimePickerType.Both ||
                   type == DateTimePickerType.Time)

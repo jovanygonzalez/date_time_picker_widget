@@ -1,9 +1,8 @@
-
 import 'date.dart';
 
 class Week {
-  final int number;
-  List<Date>? days;
+  final int index;
+  final List<Date> days;
 
-  Week({required this.number, this.days});
+  Week({required this.index, required this.days});
 }

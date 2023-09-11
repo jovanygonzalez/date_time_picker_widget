@@ -52,10 +52,10 @@ class DatePickerView extends ViewModelWidget<DateTimePickerViewModel> {
                       ),
                       onPressed: viewModel.onClickPrevious),
                   Text(
-                    viewModel.selectedDate != null
+                    viewModel.selectedDate == null
                         // ignore: lines_longer_than_80_chars
-                        ? '${DateFormat('MMMM yyyy', locale).format(viewModel.selectedDate!)}'
-                        : '',
+                        ? ''
+                        : '${DateFormat('MMMM yyyy', locale).format(viewModel.selectedDate!)}',
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,

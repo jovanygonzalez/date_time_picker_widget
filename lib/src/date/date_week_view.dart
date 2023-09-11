@@ -2,6 +2,9 @@ import 'package:date_time_picker_widget/src/date_time_picker_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
+import '../date.dart';
+import '../week.dart';
+
 class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
   final BoxConstraints constraints;
 
@@ -15,71 +18,70 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
       height: 53.0 * viewModel.numberOfWeeksToDisplay,
       child: PageView.builder(
         controller: viewModel.dateScrollController,
-        itemCount: ((viewModel.dateSlots?.length ?? 0) /
+        itemCount: ((viewModel.weekSlots?.length ?? 0) /
                 viewModel.numberOfWeeksToDisplay)
             .round(),
-        itemBuilder: (context, index) {
+        itemBuilder: (context, pageIndex) {
           return ListView.builder(
-              //physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, wIndex) {
-                print(
-                    '$wIndex + $index * ${viewModel.numberOfWeeksToDisplay} = '
-                    '${wIndex + (index * viewModel.numberOfWeeksToDisplay)}');
-                print('${viewModel.dateSlots?.length}');
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  height: 53,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return SizedBox(width: w);
-                    },
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount:
-                        viewModel.dateSlots![wIndex + index]!.days!.length,
-                    itemBuilder: (context, i) {
-                      final e = viewModel.dateSlots![wIndex + index]!.days![i];
+            itemCount: viewModel.numberOfWeeksToDisplay,
+            itemBuilder: (context, wIndex) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                height: 53,
+                child: ListView.separated(
+                  separatorBuilder: (context, index) {
+                    return SizedBox(width: w);
+                  },
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 7,
+                  itemBuilder: (context, i) {
+                    final Week week = viewModel.weekSlots![pageIndex]!;
 
-                      return Center(
-                        child: InkWell(
-                          onTap: !e.enabled
-                              ? null
-                              : () => viewModel.selectedDateIndex = e.index,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(90),
-                              border: Border.all(
-                                color: e.index == viewModel.selectedDateIndex
+                    print('week_index: ${pageIndex}');
+                    print('day_index: ${i + 1}');
+                    final Date date = week.days[i];
+
+                    return Center(
+                      child: InkWell(
+                        onTap: !date.enabled
+                            ? null
+                            : () => viewModel.selectedDateIndex = date.index,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(90),
+                            border: Border.all(
+                              color: date.index == viewModel.selectedDateIndex
+                                  ? Theme.of(context).colorScheme.secondary
+                                  : Colors.grey,
+                            ),
+                            color: date.enabled
+                                ? date.index == viewModel.selectedDateIndex
                                     ? Theme.of(context).colorScheme.secondary
-                                    : Colors.grey,
-                              ),
-                              color: e.enabled
-                                  ? e.index == viewModel.selectedDateIndex
-                                      ? Theme.of(context).colorScheme.secondary
-                                      : Colors.white
-                                  : Colors.grey.shade300,
-                            ),
-                            alignment: Alignment.center,
-                            width: 32,
-                            height: 32,
-                            child: Text(
-                              '${e.date!.day}',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: e.index == viewModel.selectedDateIndex
-                                      ? Colors.white
-                                      : Colors.grey),
-                              textAlign: TextAlign.center,
-                            ),
+                                    : Colors.white
+                                : Colors.grey.shade300,
+                          ),
+                          alignment: Alignment.center,
+                          width: 32,
+                          height: 32,
+                          child: Text(
+                            '${date.date!.day}',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: date.index == viewModel.selectedDateIndex
+                                    ? Colors.white
+                                    : Colors.grey),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                );
-              },
-              itemCount: viewModel.numberOfWeeksToDisplay);
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
         },
       ),
     );

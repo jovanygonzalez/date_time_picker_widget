@@ -94,15 +94,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(height: 24),
                   const Divider(),
                   const SizedBox(height: 24),
-                  _datePicker(),
+                  // _datePicker(),
                   const SizedBox(height: 24),
                   const Divider(),
                   const SizedBox(height: 24),
-                  _timePicker(),
+                  // _timePicker(),
                   const Divider(),
                   const SizedBox(height: 24),
-                  _newDatetimePicker(),
-
+                  // _newDatetimePicker(),
                 ],
               ),
             ),
@@ -112,79 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _newDatetimePicker(){
-    final dt = DateTime.now();
-    final dtMin = DateTime.now().add(const Duration(hours: 1, minutes: 0));
-    final dtMax = dtMin.add(const Duration(
-      days: 4,
-    ));
-    debugPrint('dt: ${dt.toString()}');
-    debugPrint('dtMin: ${dtMin.toString()}');
-    debugPrint('dtMax: ${dtMax.toString()}');
-
-    return Container(
-        child: DateTimePicker(
-          initialSelectedDate: dtMin,
-          startDate: dtMin,
-          //.subtract(const Duration(days: 1)),
-          endDate: dtMax,
-          startTime: dt,
-          endTime: dtMax,
-          timeInterval: const Duration(minutes: 15),
-          datePickerTitle: 'Pick your preferred date',
-          timePickerTitle: 'Pick your preferred time',
-          timeOutOfRangeError: 'Sorry shop is closed now',
-          is24h: false,
-          numberOfWeeksToDisplay: 1,
-          locale: 'es',
-          customStringWeekdays: const ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
-          onDateChanged: (date) {
-            setState(() {
-              _d1 = DateFormat('dd MMM, yyyy').format(date);
-            });
-          },
-          onTimeChanged: (time) {
-            setState(() {
-              _t1 = DateFormat('hh:mm:ss aa').format(time);
-            });
-          },
-        ) /*DateTimePicker(
-        /*initialSelectedDate: dtMin.add(const Duration(minutes: 5)),
-        startDate: dtMin,
-        endDate: dtMax,
-        startTime: dtMin,
-        endTime: dtMax,//DateTime(dt.year, dt.month, dt.day, 18),
-        timeInterval: interval,*/
-        initialSelectedDate: dt,
-        startDate: dt.subtract(const Duration(days: 1)),
-        endDate: dt.add(const Duration(days: 60)),
-        startTime: DateTime(dt.year, dt.month, dt.day, 6),
-        endTime: DateTime(dt.year, dt.month, dt.day, 18),
-        timeInterval: const Duration(minutes: 15),
-        datePickerTitle: 'Elige la fecha',
-        timePickerTitle: 'Elige la hora',
-        timeOutOfRangeError: 'Fuera del rango',
-        is24h: true,
-        locale: "es",
-        customStringWeekdays: ["D", "L", "M", "X", "J", "V", "S"],
-        onDateChanged: (date) {
-          //setState(() {
-          final _d1 = DateFormat('dd MMM, yyyy').format(date);
-          debugPrint("onDateChanged d1: $_d1");
-          //});
-        },
-        onTimeChanged: (time) {
-          //setState(() {
-          final _t1 = DateFormat('hh:mm:ss aa').format(time);
-          debugPrint("onDateChanged t1: $_t1");
-          //});
-        },
-      ),*/
-    );
-  }
-
   Widget _dateTimePicker() {
-    final dt = DateTime.now();
+    final dt = DateTime.now().toUtc();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -202,16 +130,16 @@ class _MyHomePageState extends State<MyHomePage> {
         const SizedBox(height: 16),
         DateTimePicker(
           initialSelectedDate: dt,
-          startDate: dt.subtract(const Duration(days: 1)),
-          endDate: dt.add(const Duration(days: 60)),
-          startTime: DateTime(dt.year, dt.month, dt.day, 6),
-          endTime: DateTime(dt.year, dt.month, dt.day, 18),
+          startDate: dt.subtract(const Duration(days: 3)),
+          endDate: dt.add(const Duration(days: 62)),
+          startTime: DateTime.now().toUtc(),
+          endTime: DateTime(dt.year, dt.month, dt.day, 23).toUtc(),
           timeInterval: const Duration(minutes: 15),
           datePickerTitle: 'Pick your preferred date',
           timePickerTitle: 'Pick your preferred time',
           timeOutOfRangeError: 'Sorry shop is closed now',
           is24h: false,
-          numberOfWeeksToDisplay: 4,
+          numberOfWeeksToDisplay: 1,
           onDateChanged: (date) {
             setState(() {
               _d1 = DateFormat('dd MMM, yyyy').format(date);
@@ -220,63 +148,6 @@ class _MyHomePageState extends State<MyHomePage> {
           onTimeChanged: (time) {
             setState(() {
               _t1 = DateFormat('hh:mm:ss aa').format(time);
-            });
-          },
-        )
-      ],
-    );
-  }
-
-  Widget _datePicker() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Date Picker',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Date: $_d2',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
-        DateTimePicker(
-          type: DateTimePickerType.Date,
-          onDateChanged: (date) {
-            setState(() {
-              _d2 = DateFormat('dd MMM, yyyy').format(date);
-            });
-          },
-        )
-      ],
-    );
-  }
-
-  Widget _timePicker() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Time Picker',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Time: $_t2',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
-        DateTimePicker(
-          type: DateTimePickerType.Time,
-          timeInterval: const Duration(minutes: 30),
-          onTimeChanged: (time) {
-            setState(() {
-              _t2 = DateFormat('hh:mm:ss aa').format(time);
             });
           },
         )
