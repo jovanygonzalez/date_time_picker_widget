@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
         DateTimePicker(
           initialSelectedDate: dt,
           startDate: dt.subtract(const Duration(days: 3)),
-          endDate: dt.add(const Duration(days: 63)),
+          endDate: dt.add(const Duration(days: 60)),
           startTime: DateTime.now().toUtc(),
           endTime: DateTime(dt.year, dt.month, dt.day, 23).toUtc(),
           timeInterval: const Duration(minutes: 15),

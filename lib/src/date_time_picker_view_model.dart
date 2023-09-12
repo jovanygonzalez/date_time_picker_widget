@@ -102,6 +102,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   set selectedDateObjet(Date selectedDateObjet) {
     _selectedDateObjet = selectedDateObjet;
     notifyListeners();
+    onDateChanged!(selectedDateObjet.date!);
     _fetchTimeSlots(selectedDateObjet);
   }
 
