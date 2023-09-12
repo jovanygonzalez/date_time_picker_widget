@@ -166,10 +166,15 @@ class DateTimePickerViewModel extends BaseViewModel {
     fillWeekSlots(initialSelectedDate!);
 
     Future.delayed(const Duration(milliseconds: 500), () {
+      //Una vez que termines de "construir" el weekSlots en fillWeekSlots() vamos a establecer el día seleccionado aprovechando el delayed
+      //En el fillWeekSlots() ya se había establecido el _selectedDateObjet, pero no se hace ninguna animación
+      //Sino hasta que se usa establece el selectedDateObjet que es una variable diferente
+      selectedDateObjet = _selectedDateObjet;
+
       if (type == DateTimePickerType.Both || type == DateTimePickerType.Date) {
         if (weekSlots!.isNotEmpty) {
           dateScrollController.animateToPage(
-            0,
+            selectedDateObjet.weekIndex,
             duration: const Duration(seconds: 1),
             curve: Curves.linearToEaseOut,
           );
