@@ -2,7 +2,6 @@ import 'package:date_time_picker_widget/src/date.dart';
 import 'package:date_time_picker_widget/src/date_time_picker_type.dart';
 import 'package:date_time_picker_widget/src/week.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stacked/stacked.dart';
@@ -80,12 +79,6 @@ class DateTimePickerViewModel extends BaseViewModel {
       weekdays = _weekdays;
     }
   }
-
-  //En este campo se van a guardar los índices de navegación entre meses
-  //Si tenemos el índice de la semana que contiene el primer día del mes, entonces podemos navegar entre meses
-  /*años-mes, weekIndex */
-  /*2023-09, 6*/
-  Map<String, int> monthNavigationIndexes = {};
 
   int _numberOfWeeks = 0;
   int get numberOfWeeks => _numberOfWeeks;
@@ -234,14 +227,6 @@ class DateTimePickerViewModel extends BaseViewModel {
         date: buildCurrentDate,
         enabled: getIsEnabledDay(buildCurrentDate),
       );
-
-      //En el objeto Week se le debe indicar si contiene el minimo día del mes
-      //Esto servirá para navegación entre las diferentes meses.
-      // Y digo mínimo porque puede que no se pueda mostrar el día 1 del mes
-      if (buildCurrentDate.day == 1 || dayElementIndex == 0) {
-        final String yearMonth = DateFormat('yyyy-MM').format(buildCurrentDate);
-        monthNavigationIndexes[yearMonth] = weekIndex;
-      }
 
       fillingWeek.days.add(newDate);
 
@@ -401,43 +386,91 @@ class DateTimePickerViewModel extends BaseViewModel {
     return dt.add(Duration(minutes: timeInterval.inMinutes * index));
   }
 
+  //TODO: Esto no es funcional si el mes completo está deshabilitado.
+  //La probabilidad es poca pero se debe corregir con en el futuro
   void onClickPrevious() {
-    int? previousInitialWeekIndex;
+    Date? latMonthPreviousDate;
+    Date? lastMonthDate;
+    final int targetMonth = getPreviouMonth(selectedDateObjet.date!.month);
 
-    final previousMonth = DateTime(
-      selectedDateObjet.date!.year,
-      selectedDateObjet.date!.month - 1,
-      selectedDateObjet.date!.day,
-    );
+    /*
+    Este for puede ser un poco complejo de enteder.
+    Pero lo que hace es ir en decremento, ambos for (decrementa la lista de semanas y los días de la semana )
+    Tener en cuenta que hay dos variables latMonthPreviousDate y lastMonthDate:
+    1. El objetivo de latMonthPreviousDate es guardar el último día del mes anterior
+    2. Y el objetivo de lastMonthDate es guardar el último día del mes (sin importar si es el mes anterior)
 
-    final String yearMonth = DateFormat('yyyy-MM').format(previousMonth);
-    previousInitialWeekIndex = monthNavigationIndexes[yearMonth];
+    Cuando lastMonthDate resulta tener un mes del que no se busca entonces latMonthPreviousDate ya debería tener el último día del mes anterior
+    * */
+    for (var i = selectedDateObjet.weekIndex; i >= 0; i--) {
+      final Week week = weekSlots![i]!;
 
-    //Cuando finalizamos la búsqueda pero no se encontró la semana con el siguiente mes
-    //Entonces no hacemos nada
-    if (previousInitialWeekIndex != null) {
-      dateScrollController.animateToPage(previousInitialWeekIndex,
-          duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+      for (var j = week.days.length - 1; j >= 0; j--) {
+        final Date date = week.days[j];
+        lastMonthDate = date;
+        if (date.enabled && date.date!.month == targetMonth) {
+          latMonthPreviousDate = lastMonthDate;
+        }
+      }
+
+      //Cuando lastMonthDate apenas resulta tener el mes anterior anterior (anterior por dos)
+      // latMonthPreviousDate ya debería tener el último día del mes anterior (anterior por uno)
+      if (lastMonthDate!.date!.month == getPreviouMonth(targetMonth)) {
+        break;
+      }
+    }
+
+    if (latMonthPreviousDate != null) {
+      setNewDate(latMonthPreviousDate);
     }
   }
 
+  //TODO: Esto no es funcional si el mes completo está deshabilitado.
+  //La probabilidad es poca pero se debe corregir con en el futuro
+  //Lo que hace esta función es iterar desde el día seleccionado hasta el final de la lista de semanas
+  //Hasta que encuentre un día habilitado que sea del siguiente mes
   void onClickNext() {
-    int? nextInitialWeekIndex;
+    Date? firstMonthDate;
+    final int targetMonth = getNextMonth(selectedDateObjet.date!.month);
 
-    final nextMonth = DateTime(
-      selectedDateObjet.date!.year,
-      selectedDateObjet.date!.month + 1,
-      selectedDateObjet.date!.day,
-    );
+    outerLoop:
+    for (var i = selectedDateObjet.weekIndex; i < weekSlots!.length; i++) {
+      final Week week = weekSlots![i]!;
 
-    final String yearMonth = DateFormat('yyyy-MM').format(nextMonth);
-    nextInitialWeekIndex = monthNavigationIndexes[yearMonth];
+      for (var j = 0; j < week.days.length; j++) {
+        final Date date = week.days[j];
+        if (date.enabled && date.date!.month == targetMonth) {
+          firstMonthDate = date;
+          break outerLoop;
+        }
+      }
+    }
 
-    //Cuando finalizamos la búsqueda pero no se encontró la semana con el siguiente mes
-    //Entonces no hacemos nada
-    if (nextInitialWeekIndex != null) {
-      dateScrollController.animateToPage(nextInitialWeekIndex,
-          duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+    if (firstMonthDate != null) {
+      setNewDate(firstMonthDate);
+    }
+  }
+
+  void setNewDate(Date date) {
+    selectedDateObjet = date;
+
+    dateScrollController.animateToPage(date.weekIndex,
+        duration: const Duration(seconds: 1), curve: Curves.linearToEaseOut);
+  }
+
+  int getNextMonth(int month) {
+    if (month == DateTime.december) {
+      return DateTime.january;
+    } else {
+      return month + 1;
+    }
+  }
+
+  int getPreviouMonth(int month) {
+    if (month == DateTime.january) {
+      return DateTime.december;
+    } else {
+      return month - 1;
     }
   }
 }
