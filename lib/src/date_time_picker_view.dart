@@ -22,9 +22,11 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
   final int numberOfWeeksToDisplay;
   final List<String>? customStringWeekdays;
   final String? locale;
+  final List<DateTime>? disableDays;
 
   /// Constructs a DateTimePicker
   const DateTimePicker({
+    this.disableDays,
     Key? key,
     this.initialSelectedDate,
     this.onDateChanged,
@@ -43,6 +45,8 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.customStringWeekdays,
     this.locale,
   }) : super(key: key);
+
+
 
   @override
   Widget builder(
@@ -132,6 +136,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
         customStringWeekdays,
         numberOfWeeksToDisplay,
         locale,
+        disableDays,
       );
 
   @override

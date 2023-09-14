@@ -44,6 +44,17 @@ class _MyHomePageState extends State<MyHomePage> {
   String _t1 = '', _t2 = '';
   bool _material3 = true;
 
+  List<DateTime>? disableDays = [
+    DateTime.now().add(const Duration(days: 1)),
+    DateTime.now().add(const Duration(days: 6)),
+    DateTime.now().add(const Duration(days: 7)),
+    DateTime.now().add(const Duration(days: 10)),
+    DateTime.now().add(const Duration(days: 33)),
+    DateTime.now().add(const Duration(days: 38)),
+    DateTime.now().add(const Duration(days: 39)),
+    DateTime.now().add(const Duration(days: 41)),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -129,7 +140,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         const SizedBox(height: 16),
         DateTimePicker(
-          initialSelectedDate: dt,
+          disableDays: disableDays,
+          initialSelectedDate: dt.add(const Duration(days: 3)),
           startDate: dt.subtract(const Duration(days: 3)),
           endDate: dt.add(const Duration(days: 60)),
           startTime: DateTime.now().toUtc(),

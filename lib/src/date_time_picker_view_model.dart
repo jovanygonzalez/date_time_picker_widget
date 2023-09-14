@@ -28,6 +28,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   final String datePickerTitle;
   final String timePickerTitle;
   final String? locale;
+  final List<DateTime>? disableDays;
 
   final List<Map<String, dynamic>> _weekdays = [
     {'value': DateTime.monday, 'text': 'L'},
@@ -59,6 +60,7 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.customStringWeekdays,
     this.numberOfWeeksToDisplay,
     this.locale,
+    this.disableDays,
   ) {
     _startDate = startDate;
     _startTime = startTime;
@@ -144,11 +146,32 @@ class DateTimePickerViewModel extends BaseViewModel {
   final firstDayOnWeek = DateTime.monday;
   final lastDayOnWeek = DateTime.sunday;
 
+  bool isValidInitDateVsDisableDays(
+      DateTime initialSelectedDate, List<DateTime>? disableDays) {
+    if (disableDays == null) {
+      return true;
+    } else {
+      for (DateTime disableDay in disableDays) {
+        if (disableDay.day == initialSelectedDate.day &&
+            disableDay.month == initialSelectedDate.month &&
+            disableDay.year == initialSelectedDate.year) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
   void init() {
     final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
     final _currentDateTime = DateTime(
             currentDateTime.year, currentDateTime.month, currentDateTime.day)
         .toUtc();
+
+    if (!isValidInitDateVsDisableDays(_currentDateTime, disableDays)) {
+      throw Exception('The initial date is not valid because it is in the '
+          'list of disabled days');
+    }
 
     //DATE
     _startDate ??= _currentDateTime;
@@ -163,7 +186,7 @@ class DateTimePickerViewModel extends BaseViewModel {
         .diff(Jiffy.parseFromDateTime(_startDate!), unit: Unit.week)
         .toInt();
 
-    fillWeekSlots(initialSelectedDate!);
+    fillWeekSlots(currentDateTime);
 
     Future.delayed(const Duration(milliseconds: 500), () {
       //Una vez que termines de "construir" el weekSlots en fillWeekSlots() vamos a establecer el día seleccionado aprovechando el delayed
@@ -268,6 +291,15 @@ class DateTimePickerViewModel extends BaseViewModel {
       isEnabled = false;
     } else if (date.isAfter(_endDate!)) {
       isEnabled = false;
+    } else if (disableDays != null) {
+      for (DateTime disableDay in disableDays!) {
+        if (disableDay.day == date.day &&
+            disableDay.month == date.month &&
+            disableDay.year == date.year) {
+          isEnabled = false;
+          break;
+        }
+      }
     }
 
     return isEnabled;
