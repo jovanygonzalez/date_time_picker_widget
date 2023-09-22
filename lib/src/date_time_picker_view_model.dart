@@ -283,13 +283,19 @@ class DateTimePickerViewModel extends BaseViewModel {
       }
 
       //Aprovechamos la iteración para obtener el objeto Date del día seleccionado inicial
-      if (initialSelectedDate.difference(buildCurrentDate).inDays == 0) {
+      if (areDatesEqual(buildCurrentDate, initialSelectedDate)) {
         _selectedDateObjet = newDate;
       }
 
       buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
       dayElementIndex++;
     }
+  }
+
+  bool areDatesEqual(DateTime date1, DateTime date2) {
+    return date1.day == date2.day &&
+        date1.month == date2.month &&
+        date1.year == date2.year;
   }
 
   /*
@@ -305,9 +311,7 @@ class DateTimePickerViewModel extends BaseViewModel {
       isEnabled = false;
     } else if (disableDays != null) {
       for (DateTime disableDay in disableDays!) {
-        if (disableDay.day == date.day &&
-            disableDay.month == date.month &&
-            disableDay.year == date.year) {
+        if (areDatesEqual(date, disableDay)) {
           isEnabled = false;
           break;
         }
