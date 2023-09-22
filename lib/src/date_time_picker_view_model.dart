@@ -213,6 +213,34 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   /*
+  * Recupera el lunes anterior a partir de la fecha inicial
+  * O en caso de que la fecha inicial sea lunes, entonces regresa la misma fecha inicial
+   */
+  DateTime getWidgetStartDate(DateTime initialSelectedDate) {
+    if (initialSelectedDate.weekday == DateTime.monday) {
+      return initialSelectedDate;
+    } else {
+      final int daysToPreviousMonday =
+          initialSelectedDate.weekday - DateTime.monday;
+      return initialSelectedDate.subtract(Duration(days: daysToPreviousMonday));
+    }
+  }
+
+  /*
+  * Recupera el siguiente domingo a partir de la fecha final
+  * O en caso de que la fecha final sea domingo, entonces regresa la misma fecha final
+  * */
+  DateTime getWidgetEndDate(DateTime initialSelectedDate) {
+    if (initialSelectedDate.weekday == DateTime.sunday) {
+      return initialSelectedDate;
+    } else {
+      final int daysToNextSunday =
+          DateTime.sunday - initialSelectedDate.weekday;
+      return initialSelectedDate.add(Duration(days: daysToNextSunday));
+    }
+  }
+
+  /*
   * Llena la lista de semanas con los días que se van a mostrar en el widget
   * En el widget algunas veces se deben mostrar días que no están en el rango indicado,
   * por ello se debe calcular si sí o no (fillWeekBefore & fillWeekAfter).
@@ -223,30 +251,14 @@ class DateTimePickerViewModel extends BaseViewModel {
   * Si el día actual es el último de la semana (domingo), agregamos la semana a la lista de semanas (weekSlots)
   * */
   void fillWeekSlots(DateTime initialSelectedDate) {
-    final bool fillWeekBefore = _startDate!.weekday != firstDayOnWeek;
-    final bool fillWeekAfter = endDate!.weekday != lastDayOnWeek;
-
-    late final DateTime widgetStartDate;
-    late final DateTime widgetEndDate;
-
-    if (fillWeekBefore) {
-      final int daysToFill = _startDate!.weekday - firstDayOnWeek;
-      widgetStartDate = _startDate!.subtract(Duration(days: daysToFill));
-    } else {
-      widgetStartDate = _startDate!;
-    }
-
-    if (fillWeekAfter) {
-      final int daysToFill = lastDayOnWeek - _endDate!.weekday;
-      widgetEndDate = _endDate!.add(Duration(days: daysToFill));
-    } else {
-      widgetEndDate = _endDate!;
-    }
-
-    DateTime buildCurrentDate = widgetStartDate;
     int dayElementIndex = 0;
     int weekIndex = 0;
     Week fillingWeek = Week(index: weekIndex, days: []);
+
+    final DateTime widgetStartDate = getWidgetStartDate(_startDate!);
+    final DateTime widgetEndDate = getWidgetEndDate(_endDate!);
+
+    DateTime buildCurrentDate = widgetStartDate;
 
     while (buildCurrentDate.isBefore(widgetEndDate)) {
       //Todos los días lo agregamos en una semana
@@ -261,7 +273,7 @@ class DateTimePickerViewModel extends BaseViewModel {
 
       //Si el día es el último de la semana, agregamos la semana a la lista de semanas
       // y creamos una nueva semana
-      if (buildCurrentDate.weekday == lastDayOnWeek) {
+      if (buildCurrentDate.weekday == DateTime.sunday) {
         //Finalizó la semana y se agrega a la lista de semanas
         weekSlots!.add(fillingWeek);
 
