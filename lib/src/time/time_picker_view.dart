@@ -7,6 +7,23 @@ import 'package:stacked/stacked.dart';
 class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
   const TimePickerView({Key? key}) : super(key: key);
 
+  Text ifTimeOutOfRange(DateTimePickerViewModel viewModel) {
+    late final String text;
+
+    if (viewModel.timeSlots == null || viewModel.timeSlots!.isEmpty) {
+      final now = DateTime.now();
+      if (viewModel.selectedDateObjet.date!.year == now.year &&
+          viewModel.selectedDateObjet.date!.month == now.month &&
+          viewModel.selectedDateObjet.date!.day == now.day) {
+        text = viewModel.todayTimeOutOfRangeError;
+      }
+    } else {
+      text = viewModel.todayTimeOutOfRangeError;
+    }
+
+    return Text(text, style: const TextStyle(color: Colors.black87));
+  }
+
   @override
   Widget build(BuildContext context, DateTimePickerViewModel viewModel) {
     return Column(
@@ -26,13 +43,10 @@ class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
         Container(
           height: 45,
           alignment: Alignment.center,
-          child: viewModel.timeSlots == null
-              ? Text(
-                  viewModel.timeOutOfRangeError,
-                  style: const TextStyle(color: Colors.black87),
-                )
+          child: viewModel.timeSlots == null || viewModel.timeSlots!.isEmpty
+              ? ifTimeOutOfRange(viewModel)
               : ScrollablePositionedList.builder(
-            itemScrollController: viewModel.timeScrollController,
+                  itemScrollController: viewModel.timeScrollController,
                   itemPositionsListener: viewModel.timePositionsListener,
                   scrollDirection: Axis.horizontal,
                   itemCount: viewModel.timeSlots!.length,
@@ -57,8 +71,7 @@ class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
                         alignment: Alignment.center,
                         child: Text(
                           // ignore: lines_longer_than_80_chars
-                          '${DateFormat(viewModel.is24h ? 'HH:mm' : 'hh:mm aa')
-                              .format(date)}',
+                          '${DateFormat(viewModel.is24h ? 'HH:mm' : 'hh:mm aa').format(date)}',
                           style: TextStyle(
                               fontSize: 14,
                               color: index == viewModel.selectedTimeIndex

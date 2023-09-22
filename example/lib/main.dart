@@ -45,14 +45,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _material3 = true;
 
   List<DateTime>? disableDays = [
+    DateTime.now().add(const Duration(days: 0)),
     DateTime.now().add(const Duration(days: 1)),
-    DateTime.now().add(const Duration(days: 6)),
-    DateTime.now().add(const Duration(days: 7)),
-    DateTime.now().add(const Duration(days: 10)),
-    DateTime.now().add(const Duration(days: 33)),
-    DateTime.now().add(const Duration(days: 38)),
-    DateTime.now().add(const Duration(days: 39)),
-    DateTime.now().add(const Duration(days: 41)),
   ];
 
   @override
@@ -141,15 +135,16 @@ class _MyHomePageState extends State<MyHomePage> {
         const SizedBox(height: 16),
         DateTimePicker(
           disableDays: disableDays,
-          initialSelectedDate: dt.add(const Duration(days: 3)),
-          startDate: dt.subtract(const Duration(days: 3)),
+          // initialSelectedDate: dt.add(const Duration(days: 3)),
+          // startDate: dt.subtract(const Duration(days: 3)),
           endDate: dt.add(const Duration(days: 60)),
           startTime: DateTime.now().toUtc(),
           endTime: DateTime(dt.year, dt.month, dt.day, 23).toUtc(),
           timeInterval: const Duration(minutes: 15),
-          datePickerTitle: 'Pick your preferred date',
-          timePickerTitle: 'Pick your preferred time',
-          timeOutOfRangeError: 'Sorry shop is closed now',
+          datePickerTitle: 'Escoge una fecha',
+          timePickerTitle: 'Escoge una hora',
+          timeOutOfRangeError: 'No hay citas disponibles',
+          todayTimeOutOfRangeError: 'El día de hoy no hay citas disponibles',
           is24h: false,
           numberOfWeeksToDisplay: 1,
           onDateChanged: (date) {

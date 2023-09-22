@@ -17,6 +17,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
   final bool is24h;
   final DateTimePickerType type;
   final String timeOutOfRangeError;
+  final String todayTimeOutOfRangeError;
   final String datePickerTitle;
   final String timePickerTitle;
   final int numberOfWeeksToDisplay;
@@ -38,15 +39,14 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.timeInterval = const Duration(minutes: 1),
     this.is24h = false,
     this.type = DateTimePickerType.Both,
-    this.timeOutOfRangeError = 'Out of Range',
+    this.timeOutOfRangeError = 'There are no appointments available',
+    this.todayTimeOutOfRangeError = 'There are no appointments available today',
     this.datePickerTitle = 'Pick a Date',
     this.timePickerTitle = 'Pick a Time',
     this.numberOfWeeksToDisplay = 1,
     this.customStringWeekdays,
     this.locale,
   }) : super(key: key);
-
-
 
   @override
   Widget builder(
@@ -131,6 +131,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
         is24h,
         type,
         timeOutOfRangeError,
+        todayTimeOutOfRangeError,
         datePickerTitle,
         timePickerTitle,
         customStringWeekdays,

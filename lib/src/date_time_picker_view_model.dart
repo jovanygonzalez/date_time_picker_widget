@@ -25,6 +25,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   final bool is24h;
   final DateTimePickerType type;
   final String timeOutOfRangeError;
+  final String todayTimeOutOfRangeError;
   final String datePickerTitle;
   final String timePickerTitle;
   final String? locale;
@@ -55,6 +56,7 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.is24h,
     this.type,
     this.timeOutOfRangeError,
+    this.todayTimeOutOfRangeError,
     this.datePickerTitle,
     this.timePickerTitle,
     this.customStringWeekdays,
@@ -167,11 +169,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     final _currentDateTime = DateTime(
             currentDateTime.year, currentDateTime.month, currentDateTime.day)
         .toUtc();
-
-    if (!isValidInitDateVsDisableDays(_currentDateTime, disableDays)) {
-      throw Exception('The initial date is not valid because it is in the '
-          'list of disabled days');
-    }
 
     //DATE
     _startDate ??= _currentDateTime;
