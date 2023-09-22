@@ -1,7 +1,9 @@
+import 'package:date_time_picker_widget/src/appointments/available_appointments.dart';
 import 'package:date_time_picker_widget/src/date.dart';
 import 'package:date_time_picker_widget/src/date_time_picker_type.dart';
 import 'package:date_time_picker_widget/src/week.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stacked/stacked.dart';
@@ -10,15 +12,15 @@ import 'date.dart' as personalized_date;
 class DateTimePickerViewModel extends BaseViewModel {
   final DateTime? initialSelectedDate;
   final Function(DateTime date)? onDateChanged;
-  final Function(DateTime time)? onTimeChanged;
+  final Function(AvailableAppointments time)? onTimeChanged;
   final DateTime? startDate;
   final DateTime? endDate;
-  final DateTime? startTime;
-  final DateTime? endTime;
+  // final DateTime? startTime;
+  // final DateTime? endTime;
   DateTime? _startDate;
   DateTime? _endDate;
-  DateTime? _startTime;
-  DateTime? _endTime;
+  // DateTime? _startTime;
+  // DateTime? _endTime;
   Duration timeInterval;
   final List<String>? customStringWeekdays;
   final int numberOfWeeksToDisplay;
@@ -30,6 +32,10 @@ class DateTimePickerViewModel extends BaseViewModel {
   final String timePickerTitle;
   final String? locale;
   final List<DateTime>? disableDays;
+
+  //Se espera que el mapa tenga formato de año-mes-día, ejemplo:
+  //{"2021-12-02": [{"start": "2021-12-02 08:00:00", "end": "2021-12-02 09:00:00"}]}
+  final Map<String, List<AvailableAppointments>>? allDaysInfo;
 
   final List<Map<String, dynamic>> _weekdays = [
     {'value': DateTime.monday, 'text': 'L'},
@@ -49,8 +55,8 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.onTimeChanged,
     this.startDate,
     this.endDate,
-    this.startTime,
-    this.endTime,
+    // this.startTime,
+    // this.endTime,
     this.timeInterval,
     // ignore: avoid_positional_boolean_parameters
     this.is24h,
@@ -63,11 +69,12 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.numberOfWeeksToDisplay,
     this.locale,
     this.disableDays,
+    this.allDaysInfo,
   ) {
-    _startDate = startDate;
-    _startTime = startTime;
-    _endDate = endDate;
-    _endTime = endTime;
+    // _startDate = startDate;
+    // _startTime = startTime;
+    // _endDate = endDate;
+    // _endTime = endTime;
 
     if (customStringWeekdays != null && customStringWeekdays!.length == 7) {
       weekdays = [
@@ -122,12 +129,12 @@ class DateTimePickerViewModel extends BaseViewModel {
   set selectedTimeIndex(int selectedTimeIndex) {
     _selectedTimeIndex = selectedTimeIndex;
     notifyListeners();
-    onTimeChanged!(timeSlots![selectedTimeIndex]);
+    onTimeChanged!(timeSlots[selectedTimeIndex]);
   }
 
-  List<DateTime>? _timeSlots = [];
-  List<DateTime>? get timeSlots => _timeSlots;
-  set timeSlots(List<DateTime>? timeSlots) {
+  List<AvailableAppointments> _timeSlots = [];
+  List<AvailableAppointments> get timeSlots => _timeSlots;
+  set timeSlots(List<AvailableAppointments> timeSlots) {
     _timeSlots = timeSlots;
     notifyListeners();
   }
@@ -318,123 +325,48 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   void _fetchTimeSlots(Date currentDate) {
-    var _currentDateTime = currentDate.date;
-    //TIME
-    if (startTime == null) {
-      _startTime = DateTime(
-        _currentDateTime!.year,
-        _currentDateTime.month,
-        _currentDateTime.day,
-      ).toUtc();
-    }
-    if (endTime == null) {
-      _endTime = DateTime(
-        _currentDateTime!.year,
-        _currentDateTime.month,
-        _currentDateTime.day,
-        24,
-      ).toUtc();
+    //Si no es ninguno de los dos, no se hace nada
+    if (!(type == DateTimePickerType.Both || type == DateTimePickerType.Time)) {
+      return;
     }
 
-    if (startTime != null || endTime != null) {
-      // current time is not today
-      if (_currentDateTime!.day - DateTime.now().toUtc().day > 0) {
-        if (startTime != null) {
-          _currentDateTime = _startTime = DateTime(
-            _currentDateTime.year,
-            _currentDateTime.month,
-            _currentDateTime.day,
-            startTime!.hour,
-            startTime!.minute,
-          ).toUtc();
-        }
-        if (endTime != null) {
-          _endTime = DateTime(
-            _currentDateTime.year,
-            _currentDateTime.month,
-            _currentDateTime.day,
-            endTime!.hour,
-            endTime!.minute,
-          ).toUtc();
-        }
-      } else if (_currentDateTime
-          .isBefore(DateTime.now().toUtc().add(const Duration(seconds: 5)))) {
-        // current time is today
-        _currentDateTime = _startTime = DateTime(
-          _currentDateTime.year,
-          _currentDateTime.month,
-          _currentDateTime.day,
-          DateTime.now().toUtc().hour,
-          DateTime.now().toUtc().minute,
-        ).toUtc();
-
-        if (startTime != null && _currentDateTime.hour < startTime!.hour) {
-          _currentDateTime = _startTime = DateTime(
-            _currentDateTime.year,
-            _currentDateTime.month,
-            _currentDateTime.day,
-            startTime!.hour,
-            startTime!.minute,
-          ).toUtc();
-        }
-
-        if (endTime != null) {
-          _endTime = DateTime(
-            _currentDateTime.year,
-            _currentDateTime.month,
-            _currentDateTime.day,
-            endTime!.hour,
-            endTime!.minute,
-          ).toUtc();
-        } else {
-          _endTime = DateTime(
-            _currentDateTime.year,
-            _currentDateTime.month,
-            _currentDateTime.day,
-            24,
-            0,
-          ).toUtc();
-        }
-      }
+    //Si no hay información de los días, no se hace nada
+    if (allDaysInfo == null) {
+      return;
     }
 
-    int timeIndex = -1;
-    timeSlots = [];
-    for (int i = 0; i < _getTimeSlotsCount(); i++) {
-      final time = _getNextTime(i);
-      timeSlots!.add(time);
-      if (timeIndex == -1 &&
-          (time.difference(_currentDateTime!).inMinutes <=
-                  timeInterval.inMinutes ||
-              time.difference(_currentDateTime).inMinutes <= 0)) {
-        timeIndex = i;
-      }
-    }
+    final currentDateStr = DateFormat('yyyy-MM-dd').format(currentDate.date!);
 
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (type == DateTimePickerType.Both || type == DateTimePickerType.Time) {
-        if (timeSlots!.isNotEmpty) {
-          selectedTimeIndex = timeIndex == -1 ? 0 : timeIndex;
+    if (allDaysInfo!.containsKey(currentDateStr)) {
+      //Sí existe el día actual en el mapa de días
+      timeSlots = allDaysInfo![currentDateStr]!;
+
+      //Puede que exista el día pero no tenga citas disponibles (osea es vacío [])
+      if (timeSlots.isNotEmpty) {
+        //Si el día actual tiene citas disponibles, entonces se debe seleccionar la primera
+        Future.delayed(const Duration(milliseconds: 500), () {
+          selectedTimeIndex = 0;
           timeScrollController.scrollTo(
               index: selectedTimeIndex, duration: const Duration(seconds: 1));
-        } else {
-          timeSlots = null;
-        }
+        });
       }
-    });
+    } else {
+      //No existe el día actual en el mapa de días
+      timeSlots = [];
+    }
   }
 
-  int _getTimeSlotsCount() {
-    return (_endTime!.difference(_startTime!).inMinutes ~/
-            timeInterval.inMinutes)
-        .toInt();
-  }
+  // int _getTimeSlotsCount() {
+  //   return (_endTime!.difference(_startTime!).inMinutes ~/
+  //           timeInterval.inMinutes)
+  //       .toInt();
+  // }
 
-  DateTime _getNextTime(int index) {
-    final dt = _startTime!.add(
-        Duration(minutes: (60 - _startTime!.minute) % timeInterval.inMinutes));
-    return dt.add(Duration(minutes: timeInterval.inMinutes * index));
-  }
+  // DateTime _getNextTime(int index) {
+  //   final dt = _startTime!.add(
+  //       Duration(minutes: (60 - _startTime!.minute) % timeInterval.inMinutes));
+  //   return dt.add(Duration(minutes: timeInterval.inMinutes * index));
+  // }
 
   //TODO: Esto no es funcional si el mes completo está deshabilitado.
   //La probabilidad es poca pero se debe corregir con en el futuro

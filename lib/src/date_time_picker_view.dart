@@ -1,3 +1,4 @@
+import 'package:date_time_picker_widget/src/appointments/available_appointments.dart';
 import 'package:date_time_picker_widget/src/date/date_picker_view.dart';
 import 'package:date_time_picker_widget/src/date_time_picker_type.dart';
 import 'package:date_time_picker_widget/src/date_time_picker_view_model.dart';
@@ -8,11 +9,11 @@ import 'package:stacked/stacked.dart';
 class DateTimePicker extends StackedView<DateTimePickerViewModel> {
   final DateTime? initialSelectedDate;
   final Function(DateTime date)? onDateChanged;
-  final Function(DateTime time)? onTimeChanged;
+  final Function(AvailableAppointments time)? onTimeChanged;
   final DateTime? startDate;
   final DateTime? endDate;
-  final DateTime? startTime;
-  final DateTime? endTime;
+  // final DateTime? startTime;
+  // final DateTime? endTime;
   final Duration timeInterval;
   final bool is24h;
   final DateTimePickerType type;
@@ -25,6 +26,10 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
   final String? locale;
   final List<DateTime>? disableDays;
 
+  //Se espera que el mapa tenga formato de año-mes-día, ejemplo:
+  //{"2021-12-02": [{"start": "2021-12-02 08:00:00", "end": "2021-12-02 09:00:00"}]}
+  final Map<String, List<AvailableAppointments>>? allDaysInfo;
+
   /// Constructs a DateTimePicker
   const DateTimePicker({
     this.disableDays,
@@ -34,8 +39,8 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.onTimeChanged,
     this.startDate,
     this.endDate,
-    this.startTime,
-    this.endTime,
+    // this.startTime,
+    // this.endTime,
     this.timeInterval = const Duration(minutes: 1),
     this.is24h = false,
     this.type = DateTimePickerType.Both,
@@ -46,6 +51,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.numberOfWeeksToDisplay = 1,
     this.customStringWeekdays,
     this.locale,
+    this.allDaysInfo,
   }) : super(key: key);
 
   @override
@@ -85,9 +91,9 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
       throw Exception('endDate must be a date after startDate');
     }
 
-    if (startTime != null && endTime != null && !endTime!.isAfter(startTime!)) {
-      throw Exception('endTime must be a time after startTime');
-    }
+    // if (startTime != null && endTime != null && !endTime!.isAfter(startTime!)) {
+    //   throw Exception('endTime must be a time after startTime');
+    // }
 
     if (customStringWeekdays != null && customStringWeekdays!.length != 7) {
       throw Exception('customStringWeekdays must containt 7 items');
@@ -125,8 +131,8 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
         onTimeChanged,
         startDate,
         endDate,
-        startTime,
-        endTime,
+        // startTime,
+        // endTime,
         timeInterval,
         is24h,
         type,
@@ -138,6 +144,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
         numberOfWeeksToDisplay,
         locale,
         disableDays,
+        allDaysInfo,
       );
 
   @override

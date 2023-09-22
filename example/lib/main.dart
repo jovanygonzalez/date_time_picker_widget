@@ -117,7 +117,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _dateTimePicker() {
-    final dt = DateTime.now().toUtc();
+    final dt = DateTime.now();
+
+    final Map<String, List<AvailableAppointments>> allDaysInfo = {};
+
+    final AvailableAppointments availableAppointments = AvailableAppointments(
+      dt,
+      dt.add(const Duration(hours: 2)),
+    );
+
+    final dtStr = DateFormat('yyyy-MM-dd').format(dt);
+    allDaysInfo[dtStr] = [availableAppointments];
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -134,28 +145,30 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         const SizedBox(height: 16),
         DateTimePicker(
-          disableDays: disableDays,
-          // initialSelectedDate: dt.add(const Duration(days: 3)),
-          // startDate: dt.subtract(const Duration(days: 3)),
-          endDate: dt.add(const Duration(days: 60)),
-          startTime: DateTime.now().toUtc(),
-          endTime: DateTime(dt.year, dt.month, dt.day, 23).toUtc(),
-          timeInterval: const Duration(minutes: 15),
-          datePickerTitle: 'Escoge una fecha',
-          timePickerTitle: 'Escoge una hora',
-          timeOutOfRangeError: 'No hay citas disponibles',
-          todayTimeOutOfRangeError: 'El día de hoy no hay citas disponibles',
-          is24h: false,
-          locale: 'es',
-          numberOfWeeksToDisplay: 1,
+          allDaysInfo: allDaysInfo,
+          // disableDays: disableDays,
+          // initialSelectedDate: dt,
+          // startDate: dt,
+          // endDate: dt.add(const Duration(days: 60)),
+          // startTime: DateTime.now().toUtc(),
+          // endTime: DateTime(dt.year, dt.month, dt.day, 23).toUtc(),
+          // timeInterval: const Duration(minutes: 15),
+          // datePickerTitle: 'Escoge una fecha',
+          // timePickerTitle: 'Escoge una hora',
+          // timeOutOfRangeError: 'No hay citas disponibles',
+          // todayTimeOutOfRangeError: 'El día de hoy no hay citas disponibles',
+          // is24h: false,
+          // locale: 'es',
+          // numberOfWeeksToDisplay: 1,
           onDateChanged: (date) {
             setState(() {
               _d1 = DateFormat('dd MMM, yyyy').format(date);
             });
           },
-          onTimeChanged: (time) {
+          onTimeChanged: (availableAppointment) {
             setState(() {
-              _t1 = DateFormat('hh:mm:ss aa').format(time);
+              _t1 = DateFormat('hh:mm:ss aa')
+                  .format(availableAppointment.startTime);
             });
           },
         )

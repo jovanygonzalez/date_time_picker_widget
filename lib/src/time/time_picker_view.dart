@@ -7,18 +7,16 @@ import 'package:stacked/stacked.dart';
 class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
   const TimePickerView({Key? key}) : super(key: key);
 
-  Text ifTimeOutOfRange(DateTimePickerViewModel viewModel) {
+  Text getEmptyText(DateTimePickerViewModel viewModel) {
     late final String text;
 
-    if (viewModel.timeSlots == null || viewModel.timeSlots!.isEmpty) {
-      final now = DateTime.now();
-      if (viewModel.selectedDateObjet.date!.year == now.year &&
-          viewModel.selectedDateObjet.date!.month == now.month &&
-          viewModel.selectedDateObjet.date!.day == now.day) {
-        text = viewModel.todayTimeOutOfRangeError;
-      }
-    } else {
+    final now = DateTime.now();
+    if (viewModel.selectedDateObjet.date!.year == now.year &&
+        viewModel.selectedDateObjet.date!.month == now.month &&
+        viewModel.selectedDateObjet.date!.day == now.day) {
       text = viewModel.todayTimeOutOfRangeError;
+    } else {
+      text = viewModel.timeOutOfRangeError;
     }
 
     return Text(text, style: const TextStyle(color: Colors.black87));
@@ -43,15 +41,15 @@ class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
         Container(
           height: 45,
           alignment: Alignment.center,
-          child: viewModel.timeSlots == null || viewModel.timeSlots!.isEmpty
-              ? ifTimeOutOfRange(viewModel)
+          child: viewModel.timeSlots.isEmpty
+              ? getEmptyText(viewModel)
               : ScrollablePositionedList.builder(
                   itemScrollController: viewModel.timeScrollController,
                   itemPositionsListener: viewModel.timePositionsListener,
                   scrollDirection: Axis.horizontal,
-                  itemCount: viewModel.timeSlots!.length,
+                  itemCount: viewModel.timeSlots.length,
                   itemBuilder: (context, index) {
-                    final date = viewModel.timeSlots![index];
+                    final date = viewModel.timeSlots[index].startTime;
                     return InkWell(
                       onTap: () => viewModel.selectedTimeIndex = index,
                       child: Container(
