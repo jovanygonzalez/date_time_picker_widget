@@ -45,8 +45,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _material3 = true;
 
   List<DateTime>? disableDays = [
-    DateTime.now().add(const Duration(days: 0)),
-    DateTime.now().add(const Duration(days: 1)),
+    // DateTime.now().add(const Duration(days: 0)),
+    // DateTime.now().add(const Duration(days: 1)),
   ];
 
   @override
@@ -146,6 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
           timeOutOfRangeError: 'No hay citas disponibles',
           todayTimeOutOfRangeError: 'El día de hoy no hay citas disponibles',
           is24h: false,
+          locale: 'es',
           numberOfWeeksToDisplay: 1,
           onDateChanged: (date) {
             setState(() {

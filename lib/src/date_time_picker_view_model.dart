@@ -302,9 +302,8 @@ class DateTimePickerViewModel extends BaseViewModel {
   bool getIsEnabledDay(DateTime date) {
     bool isEnabled = true;
 
-    if (date.isBefore(_startDate!)) {
-      isEnabled = false;
-    } else if (date.isAfter(_endDate!)) {
+    if (date.isBefore(_startDate!) || date.isAfter(_endDate!)) {
+      //Si es antes del día inicial o después del día final
       isEnabled = false;
     } else if (disableDays != null) {
       for (DateTime disableDay in disableDays!) {

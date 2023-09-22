@@ -41,37 +41,21 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
 
                     return Center(
                       child: InkWell(
-                        onTap: !date.enabled
-                            ? null
-                            : () => viewModel.selectedDateObjet = date,
+                        //El día de hoy sí es seleccionable
+                        //Pero con ciertos aspectos especiales
+                        onTap: date.enabled || date.isToday
+                            ? () => viewModel.selectedDateObjet = date
+                            : null,
                         child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(90),
-                            border: Border.all(
-                              color: date.index ==
-                                      viewModel.selectedDateObjet.index
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Colors.grey,
-                            ),
-                            color: date.enabled
-                                ? date.index ==
-                                        viewModel.selectedDateObjet.index
-                                    ? Theme.of(context).colorScheme.secondary
-                                    : Colors.white
-                                : Colors.grey.shade300,
-                          ),
+                          decoration: getCircleBoxDecoration(
+                              date, viewModel.selectedDateObjet.index, context),
                           alignment: Alignment.center,
                           width: 32,
                           height: 32,
                           child: Text(
                             '${date.date!.day}',
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: date.index ==
-                                        viewModel.selectedDateObjet.index
-                                    ? Colors.white
-                                    : Colors.grey),
+                            style: getCircleTextStyle2(
+                                date, viewModel.selectedDateObjet.index),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -85,5 +69,57 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
         },
       ),
     );
+  }
+
+  BoxDecoration getCircleBoxDecoration(
+      Date date, int selectedIndex, BuildContext context) {
+    //Establecer el color del borde del circulo
+    late final Color colorBorder;
+
+    if (date.index == selectedIndex) {
+      //Si el día está seleccionado o es hoy se pinta del color secundario
+      colorBorder = Theme.of(context).colorScheme.secondary;
+    } else if (date.isToday) {
+      colorBorder = Colors.blue;
+    } else {
+      //Si el día no está seleccionado ni es hoy se pinta de gris
+      colorBorder = Colors.grey;
+    }
+
+    //Establecer el color del fondo del circulo
+    late final Color colorBackground;
+
+    if (date.enabled) {
+      if (date.index == selectedIndex) {
+        colorBackground = Theme.of(context).colorScheme.secondary;
+      } else {
+        colorBackground = Colors.white;
+      }
+    } else {
+      colorBackground = Colors.grey.shade300;
+    }
+
+    //Establecer el círculo
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(90),
+      border: Border.all(
+        color: colorBorder,
+        // width: 1.5
+      ),
+      color: colorBackground,
+    );
+  }
+
+  TextStyle getCircleTextStyle2(Date date, int selectedIndex) {
+    late final Color colorText;
+
+    if (date.index == selectedIndex) {
+      colorText = Colors.white;
+    } else {
+      colorText = Colors.grey;
+    }
+
+    return TextStyle(
+        fontSize: 14, fontWeight: FontWeight.w500, color: colorText);
   }
 }
