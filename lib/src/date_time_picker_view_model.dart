@@ -15,12 +15,8 @@ class DateTimePickerViewModel extends BaseViewModel {
   final Function(AvailableAppointments time)? onTimeChanged;
   final DateTime? startDate;
   final DateTime? endDate;
-  // final DateTime? startTime;
-  // final DateTime? endTime;
   DateTime? _startDate;
   DateTime? _endDate;
-  // DateTime? _startTime;
-  // DateTime? _endTime;
   Duration timeInterval;
   final List<String>? customStringWeekdays;
   final int numberOfWeeksToDisplay;
@@ -55,8 +51,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.onTimeChanged,
     this.startDate,
     this.endDate,
-    // this.startTime,
-    // this.endTime,
     this.timeInterval,
     // ignore: avoid_positional_boolean_parameters
     this.is24h,
@@ -71,11 +65,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.disableDays,
     this.allDaysInfo,
   ) {
-    // _startDate = startDate;
-    // _startTime = startTime;
-    // _endDate = endDate;
-    // _endTime = endTime;
-
     if (customStringWeekdays != null && customStringWeekdays!.length == 7) {
       weekdays = [
         {'value': DateTime.monday, 'text': customStringWeekdays![0]},
@@ -355,18 +344,6 @@ class DateTimePickerViewModel extends BaseViewModel {
       timeSlots = [];
     }
   }
-
-  // int _getTimeSlotsCount() {
-  //   return (_endTime!.difference(_startTime!).inMinutes ~/
-  //           timeInterval.inMinutes)
-  //       .toInt();
-  // }
-
-  // DateTime _getNextTime(int index) {
-  //   final dt = _startTime!.add(
-  //       Duration(minutes: (60 - _startTime!.minute) % timeInterval.inMinutes));
-  //   return dt.add(Duration(minutes: timeInterval.inMinutes * index));
-  // }
 
   //TODO: Esto no es funcional si el mes completo está deshabilitado.
   //La probabilidad es poca pero se debe corregir con en el futuro

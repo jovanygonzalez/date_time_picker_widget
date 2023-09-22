@@ -150,8 +150,6 @@ class _MyHomePageState extends State<MyHomePage> {
           // initialSelectedDate: dt,
           // startDate: dt,
           // endDate: dt.add(const Duration(days: 60)),
-          // startTime: DateTime.now().toUtc(),
-          // endTime: DateTime(dt.year, dt.month, dt.day, 23).toUtc(),
           // timeInterval: const Duration(minutes: 15),
           // datePickerTitle: 'Escoge una fecha',
           // timePickerTitle: 'Escoge una hora',

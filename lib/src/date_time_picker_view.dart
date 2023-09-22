@@ -12,8 +12,6 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
   final Function(AvailableAppointments time)? onTimeChanged;
   final DateTime? startDate;
   final DateTime? endDate;
-  // final DateTime? startTime;
-  // final DateTime? endTime;
   final Duration timeInterval;
   final bool is24h;
   final DateTimePickerType type;
@@ -39,8 +37,6 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.onTimeChanged,
     this.startDate,
     this.endDate,
-    // this.startTime,
-    // this.endTime,
     this.timeInterval = const Duration(minutes: 1),
     this.is24h = false,
     this.type = DateTimePickerType.Both,
@@ -91,10 +87,6 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
       throw Exception('endDate must be a date after startDate');
     }
 
-    // if (startTime != null && endTime != null && !endTime!.isAfter(startTime!)) {
-    //   throw Exception('endTime must be a time after startTime');
-    // }
-
     if (customStringWeekdays != null && customStringWeekdays!.length != 7) {
       throw Exception('customStringWeekdays must containt 7 items');
     }
@@ -131,8 +123,6 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
         onTimeChanged,
         startDate,
         endDate,
-        // startTime,
-        // endTime,
         timeInterval,
         is24h,
         type,
