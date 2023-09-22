@@ -76,11 +76,9 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
     //Establecer el color del borde del circulo
     late final Color colorBorder;
 
-    if (date.index == selectedIndex) {
+    if (date.index == selectedIndex || date.isToday) {
       //Si el día está seleccionado o es hoy se pinta del color secundario
       colorBorder = Theme.of(context).colorScheme.secondary;
-    } else if (date.isToday) {
-      colorBorder = Colors.blue;
     } else {
       //Si el día no está seleccionado ni es hoy se pinta de gris
       colorBorder = Colors.grey;
