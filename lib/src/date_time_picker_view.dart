@@ -25,7 +25,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
 
   //Se espera que el mapa tenga formato de año-mes-día, ejemplo:
   //{"2021-12-02": [{"start": "2021-12-02 08:00:00", "end": "2021-12-02 09:00:00"}]}
-  final Map<String, List<AvailableAppointments>>? allDaysInfo;
+  final Map<String, List<AvailableAppointments>> allDaysInfo;
 
   /// Constructs a DateTimePicker
   const DateTimePicker({
@@ -45,7 +45,7 @@ class DateTimePicker extends StackedView<DateTimePickerViewModel> {
     this.numberOfWeeksToDisplay = 1,
     this.customStringWeekdays,
     this.locale,
-    this.allDaysInfo,
+    required this.allDaysInfo,
   }) : super(key: key);
 
   @override

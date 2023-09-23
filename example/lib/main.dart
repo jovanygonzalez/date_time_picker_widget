@@ -40,8 +40,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Color _color = Colors.blue;
-  String _d1 = '', _d2 = '';
-  String _t1 = '', _t2 = '';
+  String _d1 = '';
+  String _t1 = '';
   bool _material3 = true;
 
   @override

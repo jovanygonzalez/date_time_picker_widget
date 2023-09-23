@@ -28,7 +28,7 @@ class DateTimePickerViewModel extends BaseViewModel {
 
   //Se espera que el mapa tenga formato de año-mes-día, ejemplo:
   //{"2021-12-02": [{"start": "2021-12-02 08:00:00", "end": "2021-12-02 09:00:00"}]}
-  final Map<String, List<AvailableAppointments>>? allDaysInfo;
+  final Map<String, List<AvailableAppointments>> allDaysInfo;
 
   final List<Map<String, dynamic>> _weekdays = [
     {'value': DateTime.monday, 'text': 'L'},
@@ -243,8 +243,8 @@ class DateTimePickerViewModel extends BaseViewModel {
 
       final buildCurrentDateStr =
           DateFormat('yyyy-MM-dd').format(buildCurrentDate);
-      if (allDaysInfo!.containsKey(buildCurrentDateStr)) {
-        availableAppointments = allDaysInfo![buildCurrentDateStr]!;
+      if (allDaysInfo.containsKey(buildCurrentDateStr)) {
+        availableAppointments = allDaysInfo[buildCurrentDateStr]!;
       } else {
         availableAppointments = [];
       }
@@ -308,11 +308,6 @@ class DateTimePickerViewModel extends BaseViewModel {
   void _fetchTimeSlots(Date currentDate) {
     //Si no es ninguno de los dos, no se hace nada
     if (!(type == DateTimePickerType.Both || type == DateTimePickerType.Time)) {
-      return;
-    }
-
-    //Si no hay información de los días, no se hace nada
-    if (allDaysInfo == null) {
       return;
     }
 
