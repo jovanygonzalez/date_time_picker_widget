@@ -113,6 +113,7 @@ class DateTimePickerViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  int initialSelectedTimeIndex = 0;
   int _selectedTimeIndex = 0;
   int get selectedTimeIndex => _selectedTimeIndex;
   set selectedTimeIndex(int selectedTimeIndex) {
@@ -168,12 +169,12 @@ class DateTimePickerViewModel extends BaseViewModel {
         .diff(Jiffy.parseFromDateTime(startDate!), unit: Unit.week)
         .toInt();
 
-    fillWeekSlots(currentDateTime);
+    _selectedDateObjet = fillWeekSlots(currentDateTime);
+    initialSelectedTimeIndex = findInitialSelectedTimeIndex(
+        _selectedDateObjet.availableAppointments, currentDateTime);
 
     Future.delayed(const Duration(milliseconds: 500), () {
       //Una vez que termines de "construir" el weekSlots en fillWeekSlots() vamos a establecer el día seleccionado aprovechando el delayed
-      //En el fillWeekSlots() ya se había establecido el _selectedDateObjet, pero no se hace ninguna animación
-      //Sino hasta que se usa establece el selectedDateObjet que es una variable diferente
       selectedDateObjet = _selectedDateObjet;
 
       if (type == DateTimePickerType.Both || type == DateTimePickerType.Date) {
@@ -232,7 +233,9 @@ class DateTimePickerViewModel extends BaseViewModel {
   *
   * Si el día actual es el último de la semana (domingo), agregamos la semana a la lista de semanas (weekSlots)
   * */
-  void fillWeekSlots(DateTime initialSelectedDate) {
+  Date fillWeekSlots(DateTime initialSelectedDate) {
+    late Date initialSelectedDateObjet;
+
     int dayElementIndex = 0;
     int weekIndex = 0;
     Week fillingWeek = Week(index: weekIndex, days: []);
@@ -278,11 +281,30 @@ class DateTimePickerViewModel extends BaseViewModel {
 
       //Aprovechamos la iteración para obtener el objeto Date del día seleccionado inicial
       if (areDatesEqual(buildCurrentDate, initialSelectedDate)) {
-        _selectedDateObjet = newDate;
+        initialSelectedDateObjet = newDate;
       }
 
       buildCurrentDate = buildCurrentDate.add(const Duration(days: 1));
       dayElementIndex++;
+    }
+
+    return initialSelectedDateObjet;
+  }
+
+  int findInitialSelectedTimeIndex(
+      List<AvailableAppointments> availableAppointments,
+      DateTime initialSelectedDate) {
+    if (availableAppointments.isEmpty) {
+      return 0;
+    } else {
+      for (var i = 0; i < availableAppointments.length; i++) {
+        final startTime = availableAppointments[i].startTime;
+        if (startTime.hour == initialSelectedDate.hour &&
+            startTime.minute == initialSelectedDate.minute) {
+          return i;
+        }
+      }
+      return 0;
     }
   }
 
@@ -316,7 +338,17 @@ class DateTimePickerViewModel extends BaseViewModel {
     if (timeSlots.isNotEmpty) {
       //Si el día actual tiene citas disponibles, entonces se debe seleccionar la primera
       Future.delayed(const Duration(milliseconds: 500), () {
-        selectedTimeIndex = 0;
+        //Este if permite que solo una vez se seleccione lo que se haya seleccionado previamente
+        //Ya que si no se hace, cada vez que se cambie de día se seleccionará lo que se haya seleccionado previamente
+        if (initialSelectedTimeIndex > 0) {
+          //Si hay una cita seleccionada previamente entonces se selecciona esa
+          selectedTimeIndex = initialSelectedTimeIndex;
+          //Se reinicia el valor para que se pierda lo que se haya seleccionado previamente
+          initialSelectedTimeIndex = 0;
+        } else {
+          selectedTimeIndex = 0;
+        }
+
         timeScrollController.scrollTo(
             index: selectedTimeIndex, duration: const Duration(seconds: 1));
       });
