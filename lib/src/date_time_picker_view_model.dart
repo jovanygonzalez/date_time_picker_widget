@@ -144,13 +144,15 @@ class DateTimePickerViewModel extends BaseViewModel {
     //TODO: CORREGIR LA DIFERENCIA ENTRE UTC Y LOCAL YA QUE GENERA ERRORES
     //2023-09-22 18:25:27.840328
     //2023-09-23 00:26:22.242856Z
-    final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
+    final now = DateTime.now().toUtc();
+
+    final currentDateTime = initialSelectedDate ?? now;
 
     //DATE
-    startDate ??= DateTime(
-            currentDateTime.year, currentDateTime.month, currentDateTime.day)
-        .toUtc();
-
+    //Star Date será now a menos que el usuario haya indicado una fecha inicial
+    startDate ??= DateTime(now.year, now.month, now.day).toUtc();
+    //Ya sea que el usuario haya indicado una fecha inicial o no
+    //Se debe truncar a ceros los minutos y segundos
     startDate =
         DateTime(startDate!.year, startDate!.month, startDate!.day).toUtc();
 
