@@ -1,9 +1,12 @@
+import 'package:date_time_picker_widget/date_time_picker_widget.dart';
+
 class Date {
   final int index;
   bool enabled;
   DateTime? date;
   final int weekIndex;
   bool isToday = false;
+  List<AvailableAppointments> availableAppointments = [];
 
   Date(
       {required this.weekIndex,

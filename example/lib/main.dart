@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _material3 = true;
 
   List<DateTime>? disableDays = [
-    // DateTime.now().add(const Duration(days: 0)),
+    DateTime.now().add(const Duration(days: 0)),
     // DateTime.now().add(const Duration(days: 1)),
   ];
 

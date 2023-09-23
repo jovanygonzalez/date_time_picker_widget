@@ -262,6 +262,12 @@ class DateTimePickerViewModel extends BaseViewModel {
         enabled: getIsEnabledDay(buildCurrentDate),
       );
 
+      final buildCurrentDateStr =
+          DateFormat('yyyy-MM-dd').format(buildCurrentDate);
+      if (allDaysInfo!.containsKey(buildCurrentDateStr)) {
+        newDate.availableAppointments = allDaysInfo![buildCurrentDateStr]!;
+      }
+
       fillingWeek.days.add(newDate);
 
       //Si el día es el último de la semana, agregamos la semana a la lista de semanas
@@ -324,24 +330,14 @@ class DateTimePickerViewModel extends BaseViewModel {
       return;
     }
 
-    final currentDateStr = DateFormat('yyyy-MM-dd').format(currentDate.date!);
-
-    if (allDaysInfo!.containsKey(currentDateStr)) {
-      //Sí existe el día actual en el mapa de días
-      timeSlots = allDaysInfo![currentDateStr]!;
-
-      //Puede que exista el día pero no tenga citas disponibles (osea es vacío [])
-      if (timeSlots.isNotEmpty) {
-        //Si el día actual tiene citas disponibles, entonces se debe seleccionar la primera
-        Future.delayed(const Duration(milliseconds: 500), () {
-          selectedTimeIndex = 0;
-          timeScrollController.scrollTo(
-              index: selectedTimeIndex, duration: const Duration(seconds: 1));
-        });
-      }
-    } else {
-      //No existe el día actual en el mapa de días
-      timeSlots = [];
+    timeSlots = currentDate.availableAppointments;
+    if (timeSlots.isNotEmpty) {
+      //Si el día actual tiene citas disponibles, entonces se debe seleccionar la primera
+      Future.delayed(const Duration(milliseconds: 500), () {
+        selectedTimeIndex = 0;
+        timeScrollController.scrollTo(
+            index: selectedTimeIndex, duration: const Duration(seconds: 1));
+      });
     }
   }
 
