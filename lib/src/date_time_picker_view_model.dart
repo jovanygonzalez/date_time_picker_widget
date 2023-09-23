@@ -13,10 +13,8 @@ class DateTimePickerViewModel extends BaseViewModel {
   final DateTime? initialSelectedDate;
   final Function(DateTime date)? onDateChanged;
   final Function(AvailableAppointments time)? onTimeChanged;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  DateTime? _startDate;
-  DateTime? _endDate;
+  DateTime? startDate;
+  DateTime? endDate;
   Duration timeInterval;
   final List<String>? customStringWeekdays;
   final int numberOfWeeksToDisplay;
@@ -147,21 +145,21 @@ class DateTimePickerViewModel extends BaseViewModel {
     //2023-09-22 18:25:27.840328
     //2023-09-23 00:26:22.242856Z
     final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
-    final _currentDateTime = DateTime(
+
+    //DATE
+    startDate ??= DateTime(
             currentDateTime.year, currentDateTime.month, currentDateTime.day)
         .toUtc();
 
-    //DATE
-    _startDate ??= _currentDateTime;
-    _startDate =
-        DateTime(_startDate!.year, _startDate!.month, _startDate!.day).toUtc();
+    startDate =
+        DateTime(startDate!.year, startDate!.month, startDate!.day).toUtc();
 
-    _endDate ??= _startDate!.add(const Duration(days: 365 * 5));
-    _endDate = DateTime(_endDate!.year, _endDate!.month, _endDate!.day).toUtc();
+    endDate ??= startDate!.add(const Duration(days: 365 * 5));
+    endDate = DateTime(endDate!.year, endDate!.month, endDate!.day).toUtc();
 
-    numberOfDays = _endDate!.difference(_startDate!).inDays;
-    numberOfWeeks = Jiffy.parseFromDateTime(_endDate!)
-        .diff(Jiffy.parseFromDateTime(_startDate!), unit: Unit.week)
+    numberOfDays = endDate!.difference(startDate!).inDays;
+    numberOfWeeks = Jiffy.parseFromDateTime(endDate!)
+        .diff(Jiffy.parseFromDateTime(startDate!), unit: Unit.week)
         .toInt();
 
     fillWeekSlots(currentDateTime);
@@ -233,8 +231,8 @@ class DateTimePickerViewModel extends BaseViewModel {
     int weekIndex = 0;
     Week fillingWeek = Week(index: weekIndex, days: []);
 
-    final DateTime widgetStartDate = getWidgetStartDate(_startDate!);
-    final DateTime widgetEndDate = getWidgetEndDate(_endDate!);
+    final DateTime widgetStartDate = getWidgetStartDate(startDate!);
+    final DateTime widgetEndDate = getWidgetEndDate(endDate!);
 
     DateTime buildCurrentDate = widgetStartDate;
 
@@ -296,8 +294,8 @@ class DateTimePickerViewModel extends BaseViewModel {
       DateTime date, List<AvailableAppointments> appointments) {
     bool isEnabled = true;
 
-    if (date.isBefore(_startDate!) ||
-        date.isAfter(_endDate!) ||
+    if (date.isBefore(startDate!) ||
+        date.isAfter(endDate!) ||
         appointments.isEmpty) {
       //Si es antes del día inicial o después del día final
       //Si no hay citas disponibles

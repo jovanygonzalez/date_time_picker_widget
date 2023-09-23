@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
           allDaysInfo: allDaysInfo,
           // initialSelectedDate: dt,
           // startDate: dt,
-          // endDate: dt.add(const Duration(days: 60)),
+          // endDate: dt.add(const Duration(days: 10)),
           // timeInterval: const Duration(minutes: 15),
           // datePickerTitle: 'Escoge una fecha',
           // timePickerTitle: 'Escoge una hora',
