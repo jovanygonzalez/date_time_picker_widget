@@ -27,7 +27,6 @@ class DateTimePickerViewModel extends BaseViewModel {
   final String datePickerTitle;
   final String timePickerTitle;
   final String? locale;
-  final List<DateTime>? disableDays;
 
   //Se espera que el mapa tenga formato de año-mes-día, ejemplo:
   //{"2021-12-02": [{"start": "2021-12-02 08:00:00", "end": "2021-12-02 09:00:00"}]}
@@ -62,7 +61,6 @@ class DateTimePickerViewModel extends BaseViewModel {
     this.customStringWeekdays,
     this.numberOfWeeksToDisplay,
     this.locale,
-    this.disableDays,
     this.allDaysInfo,
   ) {
     if (customStringWeekdays != null && customStringWeekdays!.length == 7) {
@@ -143,22 +141,6 @@ class DateTimePickerViewModel extends BaseViewModel {
 
   final firstDayOnWeek = DateTime.monday;
   final lastDayOnWeek = DateTime.sunday;
-
-  bool isValidInitDateVsDisableDays(
-      DateTime initialSelectedDate, List<DateTime>? disableDays) {
-    if (disableDays == null) {
-      return true;
-    } else {
-      for (DateTime disableDay in disableDays) {
-        if (disableDay.day == initialSelectedDate.day &&
-            disableDay.month == initialSelectedDate.month &&
-            disableDay.year == initialSelectedDate.year) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }
 
   void init() {
     //TODO: CORREGIR LA DIFERENCIA ENTRE UTC Y LOCAL YA QUE GENERA ERRORES
