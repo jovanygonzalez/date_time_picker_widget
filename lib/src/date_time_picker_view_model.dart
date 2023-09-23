@@ -100,7 +100,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   set selectedDateObjet(Date selectedDateObjet) {
     _selectedDateObjet = selectedDateObjet;
     notifyListeners();
-    onDateChanged!(selectedDateObjet.date!);
+    onDateChanged!(selectedDateObjet.date);
     _fetchTimeSlots(selectedDateObjet);
   }
 
@@ -334,7 +334,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   void onClickPrevious() {
     Date? latMonthPreviousDate;
     Date? lastMonthDate;
-    final int targetMonth = getPreviouMonth(selectedDateObjet.date!.month);
+    final int targetMonth = getPreviouMonth(selectedDateObjet.date.month);
 
     /*
     Este for puede ser un poco complejo de enteder.
@@ -351,14 +351,14 @@ class DateTimePickerViewModel extends BaseViewModel {
       for (var j = week.days.length - 1; j >= 0; j--) {
         final Date date = week.days[j];
         lastMonthDate = date;
-        if (date.enabled && date.date!.month == targetMonth) {
+        if (date.enabled && date.date.month == targetMonth) {
           latMonthPreviousDate = lastMonthDate;
         }
       }
 
       //Cuando lastMonthDate apenas resulta tener el mes anterior anterior (anterior por dos)
       // latMonthPreviousDate ya debería tener el último día del mes anterior (anterior por uno)
-      if (lastMonthDate!.date!.month == getPreviouMonth(targetMonth)) {
+      if (lastMonthDate!.date.month == getPreviouMonth(targetMonth)) {
         break;
       }
     }
@@ -374,7 +374,7 @@ class DateTimePickerViewModel extends BaseViewModel {
   //Hasta que encuentre un día habilitado que sea del siguiente mes
   void onClickNext() {
     Date? firstMonthDate;
-    final int targetMonth = getNextMonth(selectedDateObjet.date!.month);
+    final int targetMonth = getNextMonth(selectedDateObjet.date.month);
 
     outerLoop:
     for (var i = selectedDateObjet.weekIndex; i < weekSlots!.length; i++) {
@@ -382,7 +382,7 @@ class DateTimePickerViewModel extends BaseViewModel {
 
       for (var j = 0; j < week.days.length; j++) {
         final Date date = week.days[j];
-        if (date.enabled && date.date!.month == targetMonth) {
+        if (date.enabled && date.date.month == targetMonth) {
           firstMonthDate = date;
           break outerLoop;
         }

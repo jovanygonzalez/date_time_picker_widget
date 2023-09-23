@@ -11,9 +11,9 @@ class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
     late final String text;
 
     final now = DateTime.now();
-    if (viewModel.selectedDateObjet.date!.year == now.year &&
-        viewModel.selectedDateObjet.date!.month == now.month &&
-        viewModel.selectedDateObjet.date!.day == now.day) {
+    if (viewModel.selectedDateObjet.date.year == now.year &&
+        viewModel.selectedDateObjet.date.month == now.month &&
+        viewModel.selectedDateObjet.date.day == now.day) {
       text = viewModel.todayTimeOutOfRangeError;
     } else {
       text = viewModel.timeOutOfRangeError;

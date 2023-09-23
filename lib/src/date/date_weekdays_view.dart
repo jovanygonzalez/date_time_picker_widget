@@ -19,7 +19,7 @@ class DateWeekdaysView extends ViewModelWidget<DateTimePickerViewModel> {
                       style: TextStyle(
                         fontSize: 18,
                         color: e['value'] ==
-                                viewModel.selectedDateObjet.date!.weekday
+                                viewModel.selectedDateObjet.date.weekday
                             ? Colors.black
                             : Colors.grey,
                         fontWeight: FontWeight.w600,

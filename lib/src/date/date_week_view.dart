@@ -53,7 +53,7 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
                           width: 32,
                           height: 32,
                           child: Text(
-                            '${date.date!.day}',
+                            '${date.date.day}',
                             style: getCircleTextStyle2(
                                 date, viewModel.selectedDateObjet.index),
                             textAlign: TextAlign.center,
