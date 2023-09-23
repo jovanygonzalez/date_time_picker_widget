@@ -99,7 +99,11 @@ class DateTimePickerViewModel extends BaseViewModel {
     _selectedDateObjet = selectedDateObjet;
     notifyListeners();
     onDateChanged!(selectedDateObjet.date);
-    _fetchTimeSlots(selectedDateObjet);
+
+    //Si no es ninguno de los dos, no se hace nada
+    if (type == DateTimePickerType.Both || type == DateTimePickerType.Time) {
+      _fetchTimeSlots(selectedDateObjet);
+    }
   }
 
   List<Week?>? _dateSlots = [];
@@ -308,11 +312,6 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   void _fetchTimeSlots(Date currentDate) {
-    //Si no es ninguno de los dos, no se hace nada
-    if (!(type == DateTimePickerType.Both || type == DateTimePickerType.Time)) {
-      return;
-    }
-
     timeSlots = currentDate.availableAppointments;
     if (timeSlots.isNotEmpty) {
       //Si el día actual tiene citas disponibles, entonces se debe seleccionar la primera
