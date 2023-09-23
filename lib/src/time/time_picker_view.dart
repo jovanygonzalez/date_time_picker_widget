@@ -49,7 +49,7 @@ class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
                   scrollDirection: Axis.horizontal,
                   itemCount: viewModel.timeSlots.length,
                   itemBuilder: (context, index) {
-                    final date = viewModel.timeSlots[index].startTime;
+                    final date = viewModel.timeSlots[index].startTime.toLocal();
                     return InkWell(
                       onTap: () => viewModel.selectedTimeIndex = index,
                       child: Container(
