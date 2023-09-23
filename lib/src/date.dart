@@ -6,13 +6,15 @@ class Date {
   DateTime? date;
   final int weekIndex;
   bool isToday = false;
-  List<AvailableAppointments> availableAppointments = [];
+  final List<AvailableAppointments> availableAppointments;
 
-  Date(
-      {required this.weekIndex,
-      required this.index,
-      this.enabled = true,
-      this.date}) {
+  Date({
+    required this.weekIndex,
+    required this.index,
+    required this.availableAppointments,
+    this.enabled = true,
+    this.date,
+  }) {
     final now = DateTime.now();
     if (date != null) {
       isToday = date!.year == now.year &&

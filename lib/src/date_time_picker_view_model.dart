@@ -161,6 +161,9 @@ class DateTimePickerViewModel extends BaseViewModel {
   }
 
   void init() {
+    //TODO: CORREGIR LA DIFERENCIA ENTRE UTC Y LOCAL YA QUE GENERA ERRORES
+    //2023-09-22 18:25:27.840328
+    //2023-09-23 00:26:22.242856Z
     final currentDateTime = initialSelectedDate ?? DateTime.now().toUtc();
     final _currentDateTime = DateTime(
             currentDateTime.year, currentDateTime.month, currentDateTime.day)
@@ -255,18 +258,24 @@ class DateTimePickerViewModel extends BaseViewModel {
 
     while (buildCurrentDate.isBefore(widgetEndDate)) {
       //Todos los días lo agregamos en una semana
-      final newDate = personalized_date.Date(
-        weekIndex: weekIndex,
-        index: dayElementIndex,
-        date: buildCurrentDate,
-        enabled: getIsEnabledDay(buildCurrentDate),
-      );
+
+      late final List<AvailableAppointments> availableAppointments;
 
       final buildCurrentDateStr =
           DateFormat('yyyy-MM-dd').format(buildCurrentDate);
       if (allDaysInfo!.containsKey(buildCurrentDateStr)) {
-        newDate.availableAppointments = allDaysInfo![buildCurrentDateStr]!;
+        availableAppointments = allDaysInfo![buildCurrentDateStr]!;
+      } else {
+        availableAppointments = [];
       }
+
+      final newDate = personalized_date.Date(
+        weekIndex: weekIndex,
+        index: dayElementIndex,
+        date: buildCurrentDate,
+        enabled: getIsEnabledDay(buildCurrentDate, availableAppointments),
+        availableAppointments: availableAppointments,
+      );
 
       fillingWeek.days.add(newDate);
 
@@ -301,19 +310,16 @@ class DateTimePickerViewModel extends BaseViewModel {
   * Obtiene el estado de un día, si está habilitado o no
   * Solo es verdadero si está dentro del rango de fechas proporcionado
   */
-  bool getIsEnabledDay(DateTime date) {
+  bool getIsEnabledDay(
+      DateTime date, List<AvailableAppointments> appointments) {
     bool isEnabled = true;
 
-    if (date.isBefore(_startDate!) || date.isAfter(_endDate!)) {
+    if (date.isBefore(_startDate!) ||
+        date.isAfter(_endDate!) ||
+        appointments.isEmpty) {
       //Si es antes del día inicial o después del día final
+      //Si no hay citas disponibles
       isEnabled = false;
-    } else if (disableDays != null) {
-      for (DateTime disableDay in disableDays!) {
-        if (areDatesEqual(date, disableDay)) {
-          isEnabled = false;
-          break;
-        }
-      }
     }
 
     return isEnabled;
