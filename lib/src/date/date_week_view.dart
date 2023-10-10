@@ -78,7 +78,7 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
 
     if (date.index == selectedIndex || date.isToday) {
       //Si el día está seleccionado o es hoy se pinta del color secundario
-      colorBorder = Theme.of(context).colorScheme.secondary;
+      colorBorder = Theme.of(context).colorScheme.primary;
     } else {
       //Si el día no está seleccionado ni es hoy se pinta de gris
       colorBorder = Colors.grey;
@@ -89,7 +89,7 @@ class DateWeekView extends ViewModelWidget<DateTimePickerViewModel> {
 
     if (date.enabled) {
       if (date.index == selectedIndex) {
-        colorBackground = Theme.of(context).colorScheme.secondary;
+        colorBackground = Theme.of(context).colorScheme.primary;
       } else {
         colorBackground = Colors.white;
       }

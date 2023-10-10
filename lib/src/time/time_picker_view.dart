@@ -59,11 +59,11 @@ class TimePickerView extends ViewModelWidget<DateTimePickerViewModel> {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: index == viewModel.selectedTimeIndex
-                                ? Theme.of(context).colorScheme.secondary
+                                ? Theme.of(context).colorScheme.primary
                                 : Colors.grey,
                           ),
                           color: index == viewModel.selectedTimeIndex
-                              ? Theme.of(context).colorScheme.secondary
+                              ? Theme.of(context).colorScheme.primary
                               : Colors.white,
                         ),
                         alignment: Alignment.center,
